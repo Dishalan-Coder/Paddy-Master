@@ -7,3 +7,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-003-wire-frame-designing.md) - Wire frame designing (Design)
 - [PM](PM-004-create-github-repository.md) - Create github repository (Development)
 - [PM](PM-005-ui-frontend-login-page.md) - UI: Frontend Login Page (Development)
+- [PM](PM-006-ui-frontend-register-page-farmer-buyer.md) - UI: Frontend Register Page (Farmer / Buyer) (Development)
