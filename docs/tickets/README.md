@@ -58,3 +58,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-054-ui-admin-dashboard.md) - UI: Admin Dashboard (Development)
 - [PM](PM-055-ui-user-management-page.md) - UI: User Management Page (Development)
 - [PM](PM-056-ui-product-moderation-page.md) - UI: Product Moderation Page (Development)
+- [PM](PM-057-ui-market-price-management.md) - UI: Market Price Management (Development)
