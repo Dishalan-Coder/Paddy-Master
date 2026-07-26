@@ -1,0 +1,2 @@
+import { describe, it, expect, vi } from 'vitest'; import { render, screen, fireEvent } from '@testing-library/react'; import Button from '../src/components/common/Button';
+describe('Button', ()=>{ it('calls onClick', ()=>{const fn=vi.fn();render(<Button onClick={fn}>Click</Button>);fireEvent.click(screen.getByText('Click'));expect(fn).toHaveBeenCalledTimes(1);}); it('disabled when loading', ()=>{const fn=vi.fn();render(<Button onClick={fn} loading>Click</Button>);fireEvent.click(screen.getByText('Click'));expect(fn).not.toHaveBeenCalled();}); });
