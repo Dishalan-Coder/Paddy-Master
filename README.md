@@ -1,6 +1,6 @@
 # Paddy Master
 
-A professional MVP for paddy-field management and direct paddy trading. The system supports three roles—**administrator**, **paddy farmer**, and **buyer**—using a React frontend, FastAPI backend, MongoDB database, and optional Amazon S3 image storage.
+A production-oriented web platform for paddy-field management and direct paddy trading. The system supports three roles: **administrator**, **paddy farmer**, and **buyer**, using a React frontend, FastAPI backend, MongoDB database, and optional Amazon S3 image storage.
 
 ## Implemented modules
 
@@ -21,7 +21,7 @@ A professional MVP for paddy-field management and direct paddy trading. The syst
 - Searchable and filterable paddy marketplace
 - Product details, farmer verification, farmer rating, and product reviews
 - Order placement with quantity, delivery address, and notes
-- Cash-on-delivery, bank-transfer, and demonstration card payment flows
+- Cash-on-delivery, bank-transfer, and non-production card workflow
 - Active/completed order dashboard and order history
 - Review submission for delivered purchases
 - Profile and notification management
@@ -105,6 +105,25 @@ Delete database and upload volumes as well:
 docker compose down -v
 ```
 
+## Production deployment
+
+Use the production compose file for a deployable single-host setup. It keeps MongoDB off the public host ports, serves the React build through Nginx, proxies `/api` and `/uploads` to the backend service, and requires production secrets before startup.
+
+```bash
+cp .env.production.example .env.production
+# Edit .env.production with real domain, secrets, CORS origins, and storage settings.
+docker compose --env-file .env.production -f docker-compose.prod.yml up --build -d
+```
+
+Production defaults:
+
+- Frontend: exposed on `${FRONTEND_PORT:-80}`
+- API: available through the frontend origin at `/api/v1`
+- Uploads: available through the frontend origin at `/uploads`
+- Frontend health check: `/healthz`
+
+Place HTTPS, DNS, certificate renewal, and optional CDN/WAF controls at the load balancer or reverse proxy in front of the frontend container. For card payments, replace the included local workflow with a regulated provider integration before accepting real money.
+
 ## Local development
 
 ### Backend
@@ -186,6 +205,16 @@ Before accepting real money, integrate a supported payment provider, validate ca
 | `AWS_REGION` | S3 region |
 | `S3_BUCKET_NAME` | S3 bucket name |
 
+### Production compose
+
+| Variable | Description |
+|---|---|
+| `PUBLIC_SITE_URL` | Public HTTPS website origin used by operators and docs |
+| `FRONTEND_PORT` | Host port for the Nginx frontend container |
+| `MONGO_ROOT_USERNAME` | MongoDB root username for production compose |
+| `MONGO_ROOT_PASSWORD` | MongoDB root password for production compose |
+| `CORS_ORIGINS` | Exact deployed frontend origin, for example `https://paddymaster.example.com` |
+
 ### Frontend
 
 ```env
@@ -226,32 +255,29 @@ paddy-master/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   └── PRODUCTION_CHECKLIST.md
+├── .env.production.example
+├── docker-compose.prod.yml
 └── docker-compose.yml
 ```
 
 ## Verification performed
 
 ```bash
-# Backend
-pytest -q
-python -m compileall -q app scripts tests
-
 # Frontend
 npm test
 npm run build
-npm audit --omit=dev
+
+# Deployment config
+docker compose --env-file .env.production.example -f docker-compose.prod.yml config
 ```
 
-Validated results for this package:
+Validated in this pass:
 
-- Backend: **12 tests passed**
-- Frontend: **8 tests passed**
-- Python compilation: passed
-- FastAPI schema generation: **37 paths / 50 operations**
+- Frontend: **30 tests passed**
 - Frontend production build: passed
-- Production dependency audit: no known vulnerabilities
+- Production Docker Compose config: rendered successfully
 
-A live MongoDB/S3/payment-provider deployment was not executed in the build environment. Docker/local instructions and fallback behavior are included for that final environment-level validation.
+Run the backend test suite, dependency audit, container scan, and live MongoDB/S3/payment-provider checks in CI or the target deployment environment before release.
 
 ## Production requirements
 

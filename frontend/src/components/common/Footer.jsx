@@ -71,7 +71,7 @@ export default function Footer({ variant = 'public', className = '' }) {
           </nav>
           <p className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400">
             <ShieldCheck className="h-4 w-4 text-emerald-700" />
-            &copy; {year} Paddy Master. React / FastAPI / MongoDB / S3-ready.
+            &copy; {year} Paddy Master. Secure farm and market operations.
           </p>
         </div>
       </div>

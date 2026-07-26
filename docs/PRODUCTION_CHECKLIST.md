@@ -10,6 +10,14 @@
 - Run dependency and container-image scanning in CI.
 - Never commit `.env`, cloud credentials, database dumps, or user uploads.
 
+## Frontend and delivery
+
+- Use `docker-compose.prod.yml` with `.env.production` for deployment-oriented defaults.
+- Confirm the frontend health endpoint returns `200` at `/healthz`.
+- Serve the site behind HTTPS and configure DNS, certificate renewal, CDN/WAF, and access logs.
+- Keep `/api/v1` and `/uploads` same-origin through the Nginx proxy unless an external API gateway is intentionally configured.
+- Validate social metadata, favicon, web manifest, robots rules, and cache headers after deployment.
+
 ## MongoDB
 
 - Use authenticated TLS connections.
