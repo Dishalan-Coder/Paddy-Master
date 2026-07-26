@@ -1,0 +1,12 @@
+import { useNavigate } from 'react-router-dom';
+import { BadgeCheck, Leaf, MapPin, PackageOpen, Star } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
+
+export default function ProductCard({ product }) {
+  const navigate = useNavigate();
+  const image = product.image_urls?.[0];
+  return <button type="button" onClick={() => navigate(`/products/${product._id}`)} className="group overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl">
+    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-emerald-100 to-amber-50">{image ? <img src={image} alt={product.variety} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Leaf className="h-12 w-12 text-emerald-700/30" /></div>}<div className="absolute left-3 top-3 flex flex-wrap gap-2">{product.is_organic && <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-black text-emerald-700 shadow-sm backdrop-blur"><Leaf className="h-3 w-3" /> Organic</span>}{product.farmer_verified && <span className="inline-flex items-center gap-1 rounded-full bg-blue-600/90 px-2.5 py-1 text-[11px] font-black text-white shadow-sm backdrop-blur"><BadgeCheck className="h-3 w-3" /> Verified</span>}</div></div>
+    <div className="p-5"><div className="flex items-start justify-between gap-3"><div><h3 className="text-lg font-black text-slate-900">{product.variety}</h3><p className="mt-1 flex items-center gap-1 text-xs font-semibold text-slate-400"><MapPin className="h-3.5 w-3.5" />{product.region || product.district}</p></div><div className="text-right"><p className="text-xl font-black text-emerald-700">{formatCurrency(product.price_per_kg)}</p><p className="text-[11px] text-slate-400">per kg</p></div></div><div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4"><p className="flex items-center gap-1.5 text-sm font-semibold text-slate-500"><PackageOpen className="h-4 w-4 text-emerald-600" />{product.quantity_kg} kg</p><div className="flex items-center gap-1 text-sm font-bold text-slate-600"><Star className="h-4 w-4 fill-amber-400 text-amber-400" />{Number(product.rating || product.farmer_rating || 0).toFixed(1)}</div></div><p className="mt-3 truncate text-xs text-slate-400">Sold by {product.farmer_name || 'Paddy farmer'}</p></div>
+  </button>;
+}
