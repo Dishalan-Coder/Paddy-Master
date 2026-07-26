@@ -68,6 +68,26 @@ async def test_crop_and_expense_dates_are_mongo_safe_strings(fake_database):
 
 
 @pytest.mark.asyncio
+async def test_create_farm_rejects_name_with_numbers(fake_database):
+    _user_id, token = farmer_token(fake_database)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/farms/",
+            json={
+                "name": "Field 1",
+                "location": "Paranthan",
+                "area_acres": 2.5,
+            },
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 422
+    assert "Farm name cannot contain numbers" in response.text
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("method,path", [
     ("GET", "/api/v1/notifications/"),
     ("GET", "/api/v1/recommendations/"),

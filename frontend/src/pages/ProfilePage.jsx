@@ -7,7 +7,7 @@ import profileService, { buildProfileUpdatePayload, PROFILE_FIELDS } from '../se
 import { useAuth } from '../context/AuthContext';
 import { DISTRICTS } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
-import { getPhoneValidationError, validateEmail } from '../utils/validators';
+import { getNameValidationError, getPhoneValidationError, validateEmail } from '../utils/validators';
 
 const INITIAL_FORM = {
   full_name: '',
@@ -80,9 +80,16 @@ export const validateProfileForm = (values = {}) => {
 
   if (!fullName) {
     next.full_name = 'Full name is required.';
-  } else if (fullName.length < 2) {
-    next.full_name = 'Full name must be at least 2 characters.';
-  } else if (fullName.length > 100) {
+  } else {
+    const nameError = getNameValidationError(fullName, 'Full name');
+    if (nameError) {
+      next.full_name = nameError;
+    } else if (fullName.length < 2) {
+      next.full_name = 'Full name must be at least 2 characters.';
+    }
+  }
+
+  if (!next.full_name && fullName.length > 100) {
     next.full_name = 'Full name must be 100 characters or less.';
   }
 
@@ -144,10 +151,12 @@ export default function ProfilePage() {
   const change = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({
-      ...current,
-      [name]: name === 'phone' && /[^\d]/.test(value.trim()) ? 'Only numbers can be entered.' : '',
-    }));
+    setErrors((current) => {
+      let nextError = '';
+      if (name === 'phone' && /[^\d]/.test(value.trim())) nextError = 'Only numbers can be entered.';
+      if (name === 'full_name') nextError = getNameValidationError(value, 'Full name');
+      return { ...current, [name]: nextError };
+    });
     setError('');
     setSuccess('');
   };

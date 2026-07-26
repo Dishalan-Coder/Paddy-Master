@@ -3,6 +3,7 @@ import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import { DISTRICTS, SOIL_TYPES } from '../../utils/constants';
 import { fieldClass, hasErrors, toPositiveNumber } from '../../utils/forms';
+import { getNameValidationError } from '../../utils/validators';
 
 const INITIAL_FORM = {
   name: '',
@@ -32,7 +33,10 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
   const change = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: '' }));
+    setErrors((current) => ({
+      ...current,
+      [name]: name === 'name' ? getNameValidationError(value, 'Farm name') : '',
+    }));
     setError('');
   };
 
@@ -42,9 +46,16 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
 
     if (!form.name.trim()) {
       next.name = 'Farm name is required.';
-    } else if (form.name.trim().length < 2) {
-      next.name = 'Farm name must be at least 2 characters.';
-    } else if (form.name.trim().length > 100) {
+    } else {
+      const nameError = getNameValidationError(form.name, 'Farm name');
+      if (nameError) {
+        next.name = nameError;
+      } else if (form.name.trim().length < 2) {
+        next.name = 'Farm name must be at least 2 characters.';
+      }
+    }
+
+    if (!next.name && form.name.trim().length > 100) {
       next.name = 'Farm name must be 100 characters or less.';
     }
 

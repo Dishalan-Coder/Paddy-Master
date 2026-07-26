@@ -48,6 +48,23 @@ describe('RegisterForm', () => {
     });
   });
 
+  it('rejects numbers in the full name field', async () => {
+    render(<BrowserRouter><RegisterForm /></BrowserRouter>);
+
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Farmer 1' } });
+    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '0771234567' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'farmer@example.com' } });
+    fireEvent.change(screen.getByLabelText('District / Region'), { target: { value: 'Anuradhapura' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret1' } });
+    fireEvent.change(screen.getByLabelText('Confirm password'), { target: { value: 'secret1' } });
+    fireEvent.click(screen.getByLabelText(/I agree to the Terms/i));
+    fireEvent.click(screen.getByRole('button', { name: /register/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Full name cannot contain numbers.')).toBeInTheDocument();
+    });
+  });
+
   it('toggles both password fields', () => {
     render(<BrowserRouter><RegisterForm /></BrowserRouter>);
     const password = screen.getByLabelText('Password');

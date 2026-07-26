@@ -67,6 +67,22 @@ async def test_register_rejects_non_numeric_phone():
 
 
 @pytest.mark.asyncio
+async def test_register_rejects_name_with_numbers():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post("/api/v1/auth/register", json={
+            "full_name": "Farmer 1",
+            "phone": "0771234568",
+            "email": "badname@example.com",
+            "password": "securepass123",
+            "role": "farmer",
+            "district": "Anuradhapura",
+        })
+        assert resp.status_code == 422
+        assert "Full name cannot contain numbers" in resp.text
+
+
+@pytest.mark.asyncio
 async def test_register_rejects_phone_without_07_prefix():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:

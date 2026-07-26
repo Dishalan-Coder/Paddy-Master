@@ -11,7 +11,7 @@ from app.db.mongodb import get_database_or_raise
 from app.middleware.auth_middleware import get_current_user
 from app.services import s3_service
 from app.utils.mongo import serialize_document
-from app.utils.validators import get_phone_validation_error
+from app.utils.validators import get_name_validation_error, get_phone_validation_error
 
 router = APIRouter()
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
@@ -82,6 +82,16 @@ class ProfileUpdate(BaseModel):
         if value is None:
             return value
         error = get_phone_validation_error(value)
+        if error:
+            raise ValueError(error)
+        return value
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value):
+        if value is None:
+            return value
+        error = get_name_validation_error(value, "Full name")
         if error:
             raise ValueError(error)
         return value
