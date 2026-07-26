@@ -97,6 +97,19 @@ describe('ProfilePage', () => {
     });
   });
 
+  it('rejects numbers in profile full names', () => {
+    expect(validateProfileForm({
+      full_name: 'Farmer 1',
+      phone: '0771234567',
+      email: 'farmer@example.com',
+      district: 'Anuradhapura',
+      address: '',
+      bio: '',
+    })).toEqual({
+      full_name: 'Full name cannot contain numbers.',
+    });
+  });
+
   it('builds an update payload with only changed profile values', () => {
     expect(getChangedProfilePayload(mocks.user, {
       full_name: ' Test Farmer ',
@@ -135,6 +148,14 @@ describe('ProfilePage', () => {
     fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '077abc' } });
 
     expect(screen.getByText('Only numbers can be entered.')).toBeInTheDocument();
+  });
+
+  it('shows a no-numbers error as numbers are typed in the full name field', () => {
+    render(<ProfilePage />);
+
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Farmer 1' } });
+
+    expect(screen.getByText('Full name cannot contain numbers.')).toBeInTheDocument();
   });
 
   it('updates auth state with the saved profile response', async () => {

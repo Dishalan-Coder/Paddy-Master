@@ -3,6 +3,12 @@ export const PASSWORD_MAX_LENGTH = 128;
 
 export const validateEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 
+export const getNameValidationError = (name = '', label = 'Name') => (
+  /\d/.test(name.trim()) ? `${label} cannot contain numbers.` : ''
+);
+
+export const validateName = (name = '') => !getNameValidationError(name);
+
 export const getPhoneValidationError = (phone = '') => {
   const value = phone.trim();
   if (!value) return 'Phone number is required.';

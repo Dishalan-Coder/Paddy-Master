@@ -8,7 +8,12 @@ import ErrorAlert from '../common/ErrorAlert';
 import RoleSelector from './RoleSelector';
 import { useAuth } from '../../context/AuthContext';
 import { DISTRICTS } from '../../utils/constants';
-import { getPasswordValidationError, getPhoneValidationError, validateEmail } from '../../utils/validators';
+import {
+  getNameValidationError,
+  getPasswordValidationError,
+  getPhoneValidationError,
+  validateEmail,
+} from '../../utils/validators';
 import PasswordField from './PasswordField';
 
 export default function RegisterForm() {
@@ -33,9 +38,13 @@ export default function RegisterForm() {
     const { name, value, type, checked } = event.target;
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
     setErrors((current) => {
+      let nextError = '';
+      if (name === 'phone' && /[^\d]/.test(value.trim())) nextError = 'Only numbers can be entered.';
+      if (name === 'full_name') nextError = getNameValidationError(value, 'Full name');
+
       const next = {
         ...current,
-        [name]: name === 'phone' && /[^\d]/.test(value.trim()) ? 'Only numbers can be entered.' : '',
+        [name]: nextError,
       };
       if (name === 'password' || name === 'confirm_password') next.confirm_password = '';
       return next;
@@ -48,8 +57,13 @@ export default function RegisterForm() {
 
     if (!form.full_name.trim()) {
       next.full_name = 'Full name is required.';
-    } else if (form.full_name.trim().length < 2) {
-      next.full_name = 'Full name must be at least 2 characters.';
+    } else {
+      const nameError = getNameValidationError(form.full_name, 'Full name');
+      if (nameError) {
+        next.full_name = nameError;
+      } else if (form.full_name.trim().length < 2) {
+        next.full_name = 'Full name must be at least 2 characters.';
+      }
     }
 
     if (!form.phone.trim()) {

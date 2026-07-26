@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.utils.validators import get_name_validation_error
+
 
 class FarmCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -19,6 +21,16 @@ class FarmCreate(BaseModel):
             return value
         stripped = value.strip()
         return stripped or None
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        if value is None:
+            return value
+        error = get_name_validation_error(value, "Farm name")
+        if error:
+            raise ValueError(error)
+        return value
 
 
 class FarmInDB(FarmCreate):

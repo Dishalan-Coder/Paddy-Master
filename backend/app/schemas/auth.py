@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from app.utils.validators import get_phone_validation_error
+from app.utils.validators import get_name_validation_error, get_phone_validation_error
 
 
 class LoginRequest(BaseModel):
@@ -34,6 +34,14 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_phone(cls, value: str) -> str:
         error = get_phone_validation_error(value)
+        if error:
+            raise ValueError(error)
+        return value
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        error = get_name_validation_error(value, "Full name")
         if error:
             raise ValueError(error)
         return value

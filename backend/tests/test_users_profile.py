@@ -66,6 +66,22 @@ async def test_update_profile_rejects_trimmed_short_name():
 
 
 @pytest.mark.asyncio
+async def test_update_profile_rejects_name_with_numbers():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        registered = await register_user(client)
+
+        response = await client.put(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {registered['access_token']}"},
+            json={"full_name": "Farmer 2"},
+        )
+
+    assert response.status_code == 422
+    assert "Full name cannot contain numbers" in response.text
+
+
+@pytest.mark.asyncio
 async def test_update_profile_rejects_duplicate_email_or_phone():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
