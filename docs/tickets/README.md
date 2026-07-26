@@ -22,3 +22,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-018-ui-edit-delete-crop.md) - UI: Edit / Delete Crop (Development)
 - [PM](PM-019-api-create-farm.md) - API: Create Farm (Development)
 - [PM](PM-020-api-create-crop.md) - API: Create Crop (Development)
+- [PM](PM-021-api-get-crops-by-farmer.md) - API: Get Crops by Farmer (Development)
