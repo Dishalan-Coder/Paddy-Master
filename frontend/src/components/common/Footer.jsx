@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-import { Leaf, ShieldCheck, Sprout } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 const year = new Date().getFullYear();
 
@@ -9,9 +10,8 @@ export default function Footer({ variant = 'public', className = '' }) {
     return (
       <footer className={clsx('border-t border-slate-200/80 pt-5 text-sm text-slate-500', className)}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 font-black text-slate-700 hover:text-emerald-700">
-            <Sprout className="h-4 w-4 text-emerald-700" />
-            Paddy Master
+          <Link to="/" className="inline-flex items-center hover:opacity-90">
+            <BrandLogo size="xs" />
           </Link>
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
             <span>Smart farm records</span>
@@ -37,13 +37,7 @@ export default function Footer({ variant = 'public', className = '' }) {
       <div className="mx-auto grid max-w-7xl gap-7 px-5 py-8 text-sm text-slate-500 lg:grid-cols-[1fr_auto] lg:px-8">
         <div>
           <Link to="/" className="inline-flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-700 text-white shadow-lg shadow-emerald-900/15">
-              <Leaf className="h-5 w-5" />
-            </span>
-            <span>
-              <span className="block font-display text-lg font-black tracking-tight text-slate-900">Paddy Master</span>
-              <span className="block text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">Farm to Market</span>
-            </span>
+            <BrandLogo size="sm" />
           </Link>
           <p className="mt-4 max-w-xl leading-6">
             Crop records, weather intelligence, marketplace orders, payments, and admin controls for a more transparent paddy workflow.
