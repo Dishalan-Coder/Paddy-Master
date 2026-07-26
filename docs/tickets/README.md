@@ -64,3 +64,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-060-api-get-all-products.md) - API: Get All Products (Development)
 - [PM](PM-061-api-delete-product.md) - API: Delete Product (Development)
 - [PM](PM-062-api-update-market-prices.md) - API: Update Market Prices (Development)
+- [PM](PM-063-ui-charts-profit-sales-crops.md) - UI: Charts (Profit, Sales, Crops) (Development)
