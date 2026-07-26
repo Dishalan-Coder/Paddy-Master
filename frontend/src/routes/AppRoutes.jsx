@@ -1,6 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Loader from '../components/common/Loader';
+import RouteLoadingFallback from '../components/common/RouteLoadingFallback';
+import ErrorPage from '../pages/ErrorPage';
+import LoadingPage from '../pages/LoadingPage';
+import NetworkSlowPage from '../pages/NetworkSlowPage';
 import ProtectedRoute from './ProtectedRoute';
 
 const AuthLayout = lazy(() => import('../layouts/AuthLayout'));
@@ -36,9 +39,12 @@ const farmerOnly = (element) => (
 
 export default function AppRoutes() {
   return (
-    <Suspense fallback={<Loader fullScreen />}>
+    <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/loading" element={<LoadingPage />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="/network-slow" element={<NetworkSlowPage />} />
         <Route
           path="/login"
           element={
