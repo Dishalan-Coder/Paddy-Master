@@ -26,3 +26,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-022-api-update-crop.md) - API: Update Crop (Development)
 - [PM](PM-023-api-delete-crop.md) - API: Delete Crop (Development)
 - [PM](PM-024-ui-add-expense-form.md) - UI: Add Expense Form (Development)
+- [PM](PM-025-ui-expense-list-table.md) - UI: Expense List Table (Development)
