@@ -4,3 +4,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 
 - [PM](PM-001-requirement-gathering.md) - Requirement gathering (Plan)
 - [PM](PM-002-erd-design.md) - ERD Design (Design)
+- [PM](PM-003-wire-frame-designing.md) - Wire frame designing (Design)
