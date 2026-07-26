@@ -37,7 +37,7 @@
     @apply rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-bold text-slate-700 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/40 focus:ring-4 focus:ring-slate-100;
   }
   .card {
-    @apply rounded-[1.25rem] border border-slate-200 bg-white p-5 shadow-sm;
+    @apply rounded-lg border border-slate-200 bg-white p-5 shadow-sm;
   }
   .input-field {
     @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100;
@@ -67,19 +67,19 @@
     @apply badge bg-blue-100 text-blue-800;
   }
   .page-kicker {
-    @apply text-xs font-black uppercase tracking-[0.16em] text-emerald-700;
+    @apply text-xs font-black uppercase tracking-normal text-emerald-700;
   }
   .page-title {
-    @apply mt-1 font-display text-3xl font-black tracking-tight text-slate-950;
+    @apply mt-1 font-display text-3xl font-black tracking-normal text-slate-950;
   }
   .page-copy {
     @apply mt-2 max-w-3xl text-sm leading-6 text-slate-500;
   }
   .section-kicker {
-    @apply text-xs font-black uppercase tracking-[0.18em] text-emerald-700;
+    @apply text-xs font-black uppercase tracking-normal text-emerald-700;
   }
   .section-title {
-    @apply mt-3 font-display text-3xl font-black tracking-tight text-slate-950 sm:text-4xl;
+    @apply mt-3 font-display text-3xl font-black tracking-normal text-slate-950 sm:text-4xl;
   }
   .section-copy {
     @apply mt-4 text-base leading-7 text-slate-600;
