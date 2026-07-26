@@ -39,3 +39,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-035-ui-add-product-page.md) - UI: Add Product Page (Development)
 - [PM](PM-036-ui-product-list-farmer.md) - UI: Product List (Farmer) (Development)
 - [PM](PM-037-api-create-product.md) - API: Create Product (Development)
+- [PM](PM-038-api-get-farmer-products.md) - API: Get Farmer Products (Development)
