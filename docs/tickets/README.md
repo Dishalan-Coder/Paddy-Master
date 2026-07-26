@@ -19,3 +19,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-015-ui-add-farm-page.md) - UI: Add Farm Page (Development)
 - [PM](PM-016-ui-add-crop-page.md) - UI: Add Crop Page (Development)
 - [PM](PM-017-ui-crop-list-table.md) - UI: Crop List Table (Development)
+- [PM](PM-018-ui-edit-delete-crop.md) - UI: Edit / Delete Crop (Development)
