@@ -51,3 +51,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-047-api-create-order.md) - API: Create Order (Development)
 - [PM](PM-048-api-get-orders-buyer.md) - API: Get Orders (Buyer) (Development)
 - [PM](PM-049-api-get-orders-farmer.md) - API: Get Orders (Farmer) (Development)
+- [PM](PM-050-api-update-order-status.md) - API: Update Order Status (Development)
