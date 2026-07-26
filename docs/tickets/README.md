@@ -60,3 +60,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-056-ui-product-moderation-page.md) - UI: Product Moderation Page (Development)
 - [PM](PM-057-ui-market-price-management.md) - UI: Market Price Management (Development)
 - [PM](PM-058-api-get-all-users.md) - API: Get All Users (Development)
+- [PM](PM-059-api-delete-user.md) - API: Delete User (Development)
