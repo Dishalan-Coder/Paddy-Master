@@ -35,3 +35,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-031-ui-market-price-list.md) - UI: Market Price List (Development)
 - [PM](PM-032-api-fetch-weather-api-external.md) - API: Fetch Weather API (External) (Development)
 - [PM](PM-033-api-fetch-market-prices.md) - API: Fetch Market Prices (Development)
+- [PM](PM-034-api-admin-update-market-prices.md) - API: Admin Update Market Prices (Development)
