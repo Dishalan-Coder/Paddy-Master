@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, BadgeCheck, BarChart3, BellRing, CloudSun, Languages, Leaf,
+  ArrowRight, BadgeCheck, BarChart3, BellRing, CloudSun, Languages,
   ShieldCheck, ShoppingBag, Sprout, TrendingUp, Users, WalletCards,
 } from 'lucide-react';
+import BrandLogo from '../components/common/BrandLogo';
 import Footer from '../components/common/Footer';
 
 const features = [
@@ -26,14 +27,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#f6f8f3] text-slate-900">
       <header className="sticky top-0 z-40 border-b border-white/70 bg-[#f6f8f3]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-700 text-white shadow-lg shadow-emerald-900/15">
-              <Leaf className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="font-display text-lg font-extrabold tracking-tight">Paddy Master</p>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">Farm to Market</p>
-            </div>
+          <Link to="/" className="flex shrink-0 items-center hover:opacity-90">
+            <BrandLogo size="sm" />
           </Link>
           <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
             <a href="#features" className="hover:text-emerald-700">Features</a>

@@ -5,6 +5,7 @@ import {
   Bell, CloudSun, DollarSign, Landmark, LayoutDashboard, Package, Receipt,
   ShoppingCart, Sparkles, Sprout, Store, UserRound, Users, X,
 } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 const farmerLinks = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'dashboard' },
@@ -44,7 +45,7 @@ export default function Sidebar({ open, onClose }) {
     {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 z-40 bg-slate-950/50 lg:hidden" onClick={onClose} />}
     <aside className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-[#10291f] shadow-2xl transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full'} lg:static lg:z-auto lg:translate-x-0`}>
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-        <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-lime-300 text-emerald-950"><Sprout className="h-5 w-5" /></div><div><p className="font-display text-lg font-black text-white">Paddy Master</p><p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">Farm to Market</p></div></div>
+        <BrandLogo size="sm" />
         <button type="button" onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"><X className="h-5 w-5" /></button>
       </div>
       <div className="px-5 pt-5"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400/70">Workspace</p></div>
