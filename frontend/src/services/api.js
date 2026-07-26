@@ -14,11 +14,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isAuthRequest = /\/auth\/(login|register)/.test(error.config?.url || '');
+    const isAuthRequest = /\/auth\/(login|register)/.test(
+      error.config?.url || '',
+    );
     if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem('pm_token');
       localStorage.removeItem('pm_user');
-      if (window.location.pathname !== '/login') window.location.assign('/login');
+      if (window.location.pathname !== '/login')
+        window.location.assign('/login');
     }
     return Promise.reject(error);
   },

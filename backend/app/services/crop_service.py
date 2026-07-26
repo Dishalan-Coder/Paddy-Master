@@ -34,7 +34,11 @@ async def create_crop(farmer_id, data: CropCreate) -> dict:
 
 async def get_crops(farmer_id) -> List[dict]:
     db = get_database_or_raise()
-    crops = await db.crops.find({"farmer_id": farmer_id}).sort("created_at", -1).to_list(100)
+    crops = (
+        await db.crops.find({"farmer_id": farmer_id})
+        .sort("created_at", -1)
+        .to_list(100)
+    )
     return serialize_document(crops)
 
 
@@ -56,7 +60,9 @@ async def update_crop(crop_id: str, farmer_id, data: CropUpdate) -> Optional[dic
     update_data = data.model_dump(mode="json", exclude_none=True)
     if "farm_id" in update_data:
         farm_id = object_id_or_none(update_data["farm_id"])
-        if farm_id is None or not await db.farms.find_one({"_id": farm_id, "farmer_id": farmer_id}):
+        if farm_id is None or not await db.farms.find_one(
+            {"_id": farm_id, "farmer_id": farmer_id}
+        ):
             raise ValueError("Farm not found or not owned by you")
         update_data["farm_id"] = farm_id
     if not update_data:

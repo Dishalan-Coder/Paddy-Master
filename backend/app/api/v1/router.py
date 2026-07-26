@@ -3,8 +3,22 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
-    admin, auth, crops, expenses, farms, messages, notifications, orders,
-    payments, prices, products, recommendations, reports, reviews, users, weather,
+    admin,
+    auth,
+    crops,
+    expenses,
+    farms,
+    messages,
+    notifications,
+    orders,
+    payments,
+    prices,
+    products,
+    recommendations,
+    reports,
+    reviews,
+    users,
+    weather,
 )
 
 api_router = APIRouter()
@@ -20,8 +34,12 @@ api_router.include_router(products.router, prefix="/products", tags=["Products"]
 api_router.include_router(orders.router, prefix="/orders", tags=["Orders"])
 api_router.include_router(payments.router, prefix="/payments", tags=["Payments"])
 api_router.include_router(reviews.router, prefix="/reviews", tags=["Reviews"])
-api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
-api_router.include_router(recommendations.router, prefix="/recommendations", tags=["Recommendations"])
+api_router.include_router(
+    notifications.router, prefix="/notifications", tags=["Notifications"]
+)
+api_router.include_router(
+    recommendations.router, prefix="/recommendations", tags=["Recommendations"]
+)
 api_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(reports.router, prefix="/dashboard", tags=["Dashboard"])

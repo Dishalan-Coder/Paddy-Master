@@ -1,24 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import ProfilePage, { getChangedProfilePayload, validateProfileForm } from '../src/pages/ProfilePage';
+import ProfilePage, {
+  getChangedProfilePayload,
+  validateProfileForm,
+} from '../src/pages/ProfilePage';
 import profileService from '../src/services/profileService';
 
 const mocks = vi.hoisted(() => {
-  const profileFields = ['full_name', 'phone', 'email', 'district', 'address', 'bio'];
-  const buildProfileUpdatePayload = (data = {}) => (
+  const profileFields = [
+    'full_name',
+    'phone',
+    'email',
+    'district',
+    'address',
+    'bio',
+  ];
+  const buildProfileUpdatePayload = (data = {}) =>
     profileFields.reduce((payload, field) => {
       if (!(field in data)) return payload;
 
       const value = data[field];
       if (typeof value === 'string') {
-        payload[field] = field === 'email' ? value.trim().toLowerCase() : value.trim();
+        payload[field] =
+          field === 'email' ? value.trim().toLowerCase() : value.trim();
       } else if (value !== undefined && value !== null) {
         payload[field] = value;
       }
 
       return payload;
-    }, {})
-  );
+    }, {});
 
   return {
     refreshProfile: vi.fn(),
@@ -67,14 +77,16 @@ describe('ProfilePage', () => {
   });
 
   it('validates normalized profile values', () => {
-    expect(validateProfileForm({
-      full_name: ' A ',
-      phone: '+94771234567',
-      email: 'bad-email',
-      district: 'Invalid district',
-      address: 'x'.repeat(301),
-      bio: 'x'.repeat(501),
-    })).toEqual({
+    expect(
+      validateProfileForm({
+        full_name: ' A ',
+        phone: '+94771234567',
+        email: 'bad-email',
+        district: 'Invalid district',
+        address: 'x'.repeat(301),
+        bio: 'x'.repeat(501),
+      }),
+    ).toEqual({
       full_name: 'Full name must be at least 2 characters.',
       phone: 'Only numbers can be entered.',
       email: 'Enter a valid email address.',
@@ -85,40 +97,46 @@ describe('ProfilePage', () => {
   });
 
   it('requires profile phone numbers to start with 07', () => {
-    expect(validateProfileForm({
-      full_name: 'Test Farmer',
-      phone: '0812345678',
-      email: 'farmer@example.com',
-      district: 'Anuradhapura',
-      address: '',
-      bio: '',
-    })).toEqual({
+    expect(
+      validateProfileForm({
+        full_name: 'Test Farmer',
+        phone: '0812345678',
+        email: 'farmer@example.com',
+        district: 'Anuradhapura',
+        address: '',
+        bio: '',
+      }),
+    ).toEqual({
       phone: 'Phone number must start with 07.',
     });
   });
 
   it('rejects numbers in profile full names', () => {
-    expect(validateProfileForm({
-      full_name: 'Farmer 1',
-      phone: '0771234567',
-      email: 'farmer@example.com',
-      district: 'Anuradhapura',
-      address: '',
-      bio: '',
-    })).toEqual({
+    expect(
+      validateProfileForm({
+        full_name: 'Farmer 1',
+        phone: '0771234567',
+        email: 'farmer@example.com',
+        district: 'Anuradhapura',
+        address: '',
+        bio: '',
+      }),
+    ).toEqual({
       full_name: 'Full name cannot contain numbers.',
     });
   });
 
   it('builds an update payload with only changed profile values', () => {
-    expect(getChangedProfilePayload(mocks.user, {
-      full_name: ' Test Farmer ',
-      phone: '0771234567',
-      email: ' FARMER@example.com ',
-      district: 'Polonnaruwa',
-      address: ' Main Road ',
-      bio: '',
-    })).toEqual({
+    expect(
+      getChangedProfilePayload(mocks.user, {
+        full_name: ' Test Farmer ',
+        phone: '0771234567',
+        email: ' FARMER@example.com ',
+        district: 'Polonnaruwa',
+        address: ' Main Road ',
+        bio: '',
+      }),
+    ).toEqual({
       district: 'Polonnaruwa',
       address: 'Main Road',
     });
@@ -127,16 +145,30 @@ describe('ProfilePage', () => {
   it('shows field validation errors before updating', async () => {
     render(<ProfilePage />);
 
-    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'A' } });
-    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: 'phone' } });
-    fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'bad-email' } });
-    fireEvent.change(screen.getByLabelText('District'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: 'A' },
+    });
+    fireEvent.change(screen.getByLabelText('Phone number'), {
+      target: { value: 'phone' },
+    });
+    fireEvent.change(screen.getByLabelText('Email address'), {
+      target: { value: 'bad-email' },
+    });
+    fireEvent.change(screen.getByLabelText('District'), {
+      target: { value: '' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /save profile/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Full name must be at least 2 characters.')).toBeInTheDocument();
-      expect(screen.getByText('Only numbers can be entered.')).toBeInTheDocument();
-      expect(screen.getByText('Enter a valid email address.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Full name must be at least 2 characters.'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Only numbers can be entered.'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Enter a valid email address.'),
+      ).toBeInTheDocument();
       expect(screen.getByText('District is required.')).toBeInTheDocument();
     });
     expect(profileService.update).not.toHaveBeenCalled();
@@ -145,17 +177,25 @@ describe('ProfilePage', () => {
   it('shows a numbers-only error as letters are typed in the phone field', () => {
     render(<ProfilePage />);
 
-    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '077abc' } });
+    fireEvent.change(screen.getByLabelText('Phone number'), {
+      target: { value: '077abc' },
+    });
 
-    expect(screen.getByText('Only numbers can be entered.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Only numbers can be entered.'),
+    ).toBeInTheDocument();
   });
 
   it('shows a no-numbers error as numbers are typed in the full name field', () => {
     render(<ProfilePage />);
 
-    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Farmer 1' } });
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: 'Farmer 1' },
+    });
 
-    expect(screen.getByText('Full name cannot contain numbers.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Full name cannot contain numbers.'),
+    ).toBeInTheDocument();
   });
 
   it('updates auth state with the saved profile response', async () => {
@@ -169,10 +209,18 @@ describe('ProfilePage', () => {
     mocks.update.mockResolvedValueOnce(updatedProfile);
     render(<ProfilePage />);
 
-    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: ' Updated Farmer ' } });
-    fireEvent.change(screen.getByLabelText('Email address'), { target: { value: ' UPDATED@example.com ' } });
-    fireEvent.change(screen.getByLabelText('Address'), { target: { value: ' Main Road ' } });
-    fireEvent.change(screen.getByLabelText('Short profile description'), { target: { value: ' Organic paddy supplier. ' } });
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: ' Updated Farmer ' },
+    });
+    fireEvent.change(screen.getByLabelText('Email address'), {
+      target: { value: ' UPDATED@example.com ' },
+    });
+    fireEvent.change(screen.getByLabelText('Address'), {
+      target: { value: ' Main Road ' },
+    });
+    fireEvent.change(screen.getByLabelText('Short profile description'), {
+      target: { value: ' Organic paddy supplier. ' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /save profile/i }));
 
     await waitFor(() => {
@@ -183,19 +231,27 @@ describe('ProfilePage', () => {
         bio: 'Organic paddy supplier.',
       });
       expect(mocks.setUser).toHaveBeenCalledWith(updatedProfile);
-      expect(screen.getByText('Profile updated successfully.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Profile updated successfully.'),
+      ).toBeInTheDocument();
     });
   });
 
   it('does not call update when sanitized values are unchanged', async () => {
     render(<ProfilePage />);
 
-    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: ' Test Farmer ' } });
-    fireEvent.change(screen.getByLabelText('Email address'), { target: { value: ' FARMER@example.com ' } });
+    fireEvent.change(screen.getByLabelText('Full name'), {
+      target: { value: ' Test Farmer ' },
+    });
+    fireEvent.change(screen.getByLabelText('Email address'), {
+      target: { value: ' FARMER@example.com ' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /save profile/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('No profile changes to save.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No profile changes to save.'),
+      ).toBeInTheDocument();
     });
     expect(profileService.update).not.toHaveBeenCalled();
   });

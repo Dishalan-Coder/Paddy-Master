@@ -26,7 +26,11 @@ async def create_farm(data: FarmCreate, user=Depends(require_farmer)):
 @router.get("/")
 async def get_farms(user=Depends(require_farmer)):
     db = get_database_or_raise()
-    farms = await db.farms.find({"farmer_id": user["_id"]}).sort("created_at", -1).to_list(100)
+    farms = (
+        await db.farms.find({"farmer_id": user["_id"]})
+        .sort("created_at", -1)
+        .to_list(100)
+    )
     return serialize_document(farms)
 
 

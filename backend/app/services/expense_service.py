@@ -14,7 +14,9 @@ async def add_expense(farmer_id, data: ExpenseCreate) -> dict:
 
     if doc.get("crop_id"):
         crop_id = object_id_or_none(doc["crop_id"])
-        if crop_id is None or not await db.crops.find_one({"_id": crop_id, "farmer_id": farmer_id}):
+        if crop_id is None or not await db.crops.find_one(
+            {"_id": crop_id, "farmer_id": farmer_id}
+        ):
             raise ValueError("Crop not found or not owned by you")
         doc["crop_id"] = crop_id
     else:
@@ -22,7 +24,9 @@ async def add_expense(farmer_id, data: ExpenseCreate) -> dict:
 
     if doc.get("farm_id"):
         farm_id = object_id_or_none(doc["farm_id"])
-        if farm_id is None or not await db.farms.find_one({"_id": farm_id, "farmer_id": farmer_id}):
+        if farm_id is None or not await db.farms.find_one(
+            {"_id": farm_id, "farmer_id": farmer_id}
+        ):
             raise ValueError("Farm not found or not owned by you")
         doc["farm_id"] = farm_id
     else:
@@ -50,22 +54,28 @@ async def get_expenses(farmer_id, crop_id: str | None = None) -> List[dict]:
 
 async def calculate_profit_loss(farmer_id) -> Dict[str, Any]:
     db = get_database_or_raise()
-    exp_result = await db.expenses.aggregate([
-        {"$match": {"farmer_id": farmer_id}},
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
-    ]).to_list(1)
+    exp_result = await db.expenses.aggregate(
+        [
+            {"$match": {"farmer_id": farmer_id}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+        ]
+    ).to_list(1)
     total_expenses = exp_result[0]["total"] if exp_result else 0.0
 
-    earn_result = await db.orders.aggregate([
-        {"$match": {"farmer_id": farmer_id, "status": "delivered"}},
-        {"$group": {"_id": None, "total": {"$sum": "$total_price"}}},
-    ]).to_list(1)
+    earn_result = await db.orders.aggregate(
+        [
+            {"$match": {"farmer_id": farmer_id, "status": "delivered"}},
+            {"$group": {"_id": None, "total": {"$sum": "$total_price"}}},
+        ]
+    ).to_list(1)
     total_earnings = earn_result[0]["total"] if earn_result else 0.0
 
-    categories = await db.expenses.aggregate([
-        {"$match": {"farmer_id": farmer_id}},
-        {"$group": {"_id": "$category", "total": {"$sum": "$amount"}}},
-    ]).to_list(20)
+    categories = await db.expenses.aggregate(
+        [
+            {"$match": {"farmer_id": farmer_id}},
+            {"$group": {"_id": "$category", "total": {"$sum": "$amount"}}},
+        ]
+    ).to_list(20)
 
     return {
         "total_expenses": round(total_expenses, 2),

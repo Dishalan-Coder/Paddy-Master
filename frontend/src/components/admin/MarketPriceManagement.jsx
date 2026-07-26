@@ -8,7 +8,10 @@ const priceKey = (variety) => variety.toLowerCase().replaceAll(' ', '_');
 
 export default function MarketPriceManagement() {
   const initialPrices = useMemo(
-    () => Object.fromEntries(PADDY_VARIETIES.map((variety) => [priceKey(variety), ''])),
+    () =>
+      Object.fromEntries(
+        PADDY_VARIETIES.map((variety) => [priceKey(variety), '']),
+      ),
     [],
   );
   const [prices, setPrices] = useState(initialPrices);
@@ -35,7 +38,11 @@ export default function MarketPriceManagement() {
       setError('Enter at least one market price.');
       return;
     }
-    if (Object.values(cleanPrices).some((value) => !Number.isFinite(value) || value <= 0)) {
+    if (
+      Object.values(cleanPrices).some(
+        (value) => !Number.isFinite(value) || value <= 0,
+      )
+    ) {
       setError('Every entered price must be greater than zero.');
       return;
     }
@@ -46,7 +53,10 @@ export default function MarketPriceManagement() {
       await priceService.updatePrices({ region, prices: cleanPrices });
       setSuccess(true);
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || 'Failed to update market prices.');
+      setError(
+        requestError.response?.data?.detail ||
+          'Failed to update market prices.',
+      );
     } finally {
       setLoading(false);
     }
@@ -62,7 +72,9 @@ export default function MarketPriceManagement() {
       )}
 
       <div>
-        <label className="label" htmlFor="market-region">Region</label>
+        <label className="label" htmlFor="market-region">
+          Region
+        </label>
         <select
           id="market-region"
           value={region}
@@ -77,7 +89,10 @@ export default function MarketPriceManagement() {
       <div className="space-y-3">
         {Object.entries(prices).map(([key, value]) => (
           <div key={key} className="grid grid-cols-2 items-center gap-3">
-            <label className="text-sm font-medium capitalize" htmlFor={`price-${key}`}>
+            <label
+              className="text-sm font-medium capitalize"
+              htmlFor={`price-${key}`}
+            >
               {key.replaceAll('_', ' ')}
             </label>
             <input
@@ -94,7 +109,9 @@ export default function MarketPriceManagement() {
         ))}
       </div>
 
-      <Button type="submit" loading={loading}>Update Prices</Button>
+      <Button type="submit" loading={loading}>
+        Update Prices
+      </Button>
     </form>
   );
 }

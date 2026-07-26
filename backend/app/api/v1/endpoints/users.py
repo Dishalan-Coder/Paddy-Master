@@ -44,6 +44,7 @@ VALID_DISTRICTS = {
     "Matara",
 }
 
+
 def present_user(user: dict) -> dict:
     safe_user = serialize_document(user)
     safe_user.pop("hashed_password", None)
@@ -120,9 +121,13 @@ async def update_profile(update_data: ProfileUpdate, user=Depends(get_current_us
 
     duplicate_checks = []
     if "email" in filtered and filtered["email"] != user.get("email"):
-        duplicate_checks.append({"email": filtered["email"], "_id": {"$ne": user["_id"]}})
+        duplicate_checks.append(
+            {"email": filtered["email"], "_id": {"$ne": user["_id"]}}
+        )
     if "phone" in filtered and filtered["phone"] != user.get("phone"):
-        duplicate_checks.append({"phone": filtered["phone"], "_id": {"$ne": user["_id"]}})
+        duplicate_checks.append(
+            {"phone": filtered["phone"], "_id": {"$ne": user["_id"]}}
+        )
     if duplicate_checks and await db.users.find_one({"$or": duplicate_checks}):
         raise HTTPException(status_code=409, detail="Email or phone already in use")
 
@@ -134,7 +139,9 @@ async def update_profile(update_data: ProfileUpdate, user=Depends(get_current_us
             return_document=ReturnDocument.AFTER,
         )
     except DuplicateKeyError as exc:
-        raise HTTPException(status_code=409, detail="Email or phone already in use") from exc
+        raise HTTPException(
+            status_code=409, detail="Email or phone already in use"
+        ) from exc
 
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
@@ -155,7 +162,9 @@ async def upload_profile_photo(
         raise HTTPException(status_code=400, detail="Image must be 5 MB or smaller")
     key = s3_service.upload_file(content, "profiles", content_type)
     if not key:
-        raise HTTPException(status_code=503, detail="Image storage is currently unavailable")
+        raise HTTPException(
+            status_code=503, detail="Image storage is currently unavailable"
+        )
     image_url = s3_service.resolve_file_url(key)
     if not image_url:
         raise HTTPException(status_code=503, detail="Could not create image URL")
@@ -163,6 +172,12 @@ async def upload_profile_photo(
     db = get_database_or_raise()
     await db.users.update_one(
         {"_id": user["_id"]},
-        {"$set": {"profile_image_key": key, "profile_image_url": None, "updated_at": datetime.now(timezone.utc)}},
+        {
+            "$set": {
+                "profile_image_key": key,
+                "profile_image_url": None,
+                "updated_at": datetime.now(timezone.utc),
+            }
+        },
     )
     return {"profile_image_url": image_url}

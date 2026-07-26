@@ -12,9 +12,16 @@ const INITIAL_FORM = {
   expense_date: '',
 };
 
-const labelCategory = (category) => category.charAt(0).toUpperCase() + category.slice(1);
+const labelCategory = (category) =>
+  category.charAt(0).toUpperCase() + category.slice(1);
 
-export default function ExpenseForm({ cropOptions, onSubmit, loading, serverError, onDismissServerError }) {
+export default function ExpenseForm({
+  cropOptions,
+  onSubmit,
+  loading,
+  serverError,
+  onDismissServerError,
+}) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
@@ -36,7 +43,8 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
     if (!form.amount) next.amount = 'Amount is required.';
     else if (!amount) next.amount = 'Amount must be greater than zero.';
     if (!description) next.description = 'Description is required.';
-    else if (description.length > 200) next.description = 'Description must be 200 characters or less.';
+    else if (description.length > 200)
+      next.description = 'Description must be 200 characters or less.';
     if (!form.expense_date) next.expense_date = 'Expense date is required.';
 
     return next;
@@ -61,25 +69,51 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
     setForm(INITIAL_FORM);
   };
 
-  const fieldError = (name) => (
-    errors[name] ? <p id={`${name}-error`} className="mt-1 text-xs font-semibold text-red-500">{errors[name]}</p> : null
-  );
+  const fieldError = (name) =>
+    errors[name] ? (
+      <p
+        id={`${name}-error`}
+        className="mt-1 text-xs font-semibold text-red-500"
+      >
+        {errors[name]}
+      </p>
+    ) : null;
 
   return (
     <form onSubmit={submit} className="space-y-4" noValidate>
-      <ErrorAlert message={error || serverError} onDismiss={() => { setError(''); onDismissServerError?.(); }} />
+      <ErrorAlert
+        message={error || serverError}
+        onDismiss={() => {
+          setError('');
+          onDismissServerError?.();
+        }}
+      />
       {cropOptions?.length > 0 && (
         <div>
-          <label htmlFor="expense_crop" className="label">Crop</label>
-          <select id="expense_crop" name="crop_id" value={form.crop_id} onChange={change} className="input-field">
+          <label htmlFor="expense_crop" className="label">
+            Crop
+          </label>
+          <select
+            id="expense_crop"
+            name="crop_id"
+            value={form.crop_id}
+            onChange={change}
+            className="input-field"
+          >
             <option value="">General farm expense</option>
-            {cropOptions.map((crop) => <option key={crop._id} value={crop._id}>{crop.variety}</option>)}
+            {cropOptions.map((crop) => (
+              <option key={crop._id} value={crop._id}>
+                {crop.variety}
+              </option>
+            ))}
           </select>
         </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="expense_category" className="label">Category</label>
+          <label htmlFor="expense_category" className="label">
+            Category
+          </label>
           <select
             id="expense_category"
             name="category"
@@ -90,12 +124,18 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
             aria-describedby={errors.category ? 'category-error' : undefined}
           >
             <option value="">Select category</option>
-            {EXPENSE_CATEGORIES.map((category) => <option key={category} value={category}>{labelCategory(category)}</option>)}
+            {EXPENSE_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {labelCategory(category)}
+              </option>
+            ))}
           </select>
           {fieldError('category')}
         </div>
         <div>
-          <label htmlFor="expense_amount" className="label">Amount (Rs.)</label>
+          <label htmlFor="expense_amount" className="label">
+            Amount (Rs.)
+          </label>
           <input
             id="expense_amount"
             name="amount"
@@ -113,7 +153,9 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
         </div>
       </div>
       <div>
-        <label htmlFor="expense_description" className="label">Description</label>
+        <label htmlFor="expense_description" className="label">
+          Description
+        </label>
         <input
           id="expense_description"
           name="description"
@@ -123,12 +165,16 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
           maxLength={200}
           placeholder="Fertilizer, labour, transport..."
           aria-invalid={Boolean(errors.description)}
-          aria-describedby={errors.description ? 'description-error' : undefined}
+          aria-describedby={
+            errors.description ? 'description-error' : undefined
+          }
         />
         {fieldError('description')}
       </div>
       <div>
-        <label htmlFor="expense_date" className="label">Date</label>
+        <label htmlFor="expense_date" className="label">
+          Date
+        </label>
         <input
           id="expense_date"
           name="expense_date"
@@ -137,11 +183,15 @@ export default function ExpenseForm({ cropOptions, onSubmit, loading, serverErro
           onChange={change}
           className={fieldClass(errors, 'expense_date')}
           aria-invalid={Boolean(errors.expense_date)}
-          aria-describedby={errors.expense_date ? 'expense_date-error' : undefined}
+          aria-describedby={
+            errors.expense_date ? 'expense_date-error' : undefined
+          }
         />
         {fieldError('expense_date')}
       </div>
-      <Button type="submit" loading={loading}>Add expense</Button>
+      <Button type="submit" loading={loading}>
+        Add expense
+      </Button>
     </form>
   );
 }

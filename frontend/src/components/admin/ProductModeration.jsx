@@ -1,4 +1,60 @@
-import { useState, useEffect } from 'react'; import { Trash2 } from 'lucide-react'; import Loader from '../common/Loader'; import adminService from '../../services/adminService'; import { formatCurrency } from '../../utils/formatters';
-export default function ProductModeration() { const [products, setProducts] = useState([]); const [loading, setLoading] = useState(true); const fetch = async () => {setLoading(true);try{const d=await adminService.getProducts({skip:0,limit:50});setProducts(d.products);}catch(e){}finally{setLoading(false);}}; useEffect(()=>{fetch();},[]);
-  if(loading) return <Loader />; return <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left"><th className="pb-3 font-semibold">Variety</th><th className="pb-3 font-semibold">Qty</th><th className="pb-3 font-semibold">Price</th><th className="pb-3 font-semibold text-right">Actions</th></tr></thead><tbody className="divide-y">{products.map(p=><tr key={p._id} className="hover:bg-gray-50"><td className="py-3 font-medium">{p.variety}</td><td className="py-3">{p.quantity_kg}kg</td><td className="py-3 font-semibold">{formatCurrency(p.price_per_kg)}</td><td className="py-3 text-right"><button onClick={async()=>{if(!confirm('Remove?'))return;await adminService.deleteProduct(p._id);fetch();}} className="text-red-400 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button></td></tr>)}</tbody></table></div>;
+import { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
+import Loader from '../common/Loader';
+import adminService from '../../services/adminService';
+import { formatCurrency } from '../../utils/formatters';
+export default function ProductModeration() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const fetch = async () => {
+    setLoading(true);
+    try {
+      const d = await adminService.getProducts({ skip: 0, limit: 50 });
+      setProducts(d.products);
+    } catch (e) {
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetch();
+  }, []);
+  if (loading) return <Loader />;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b text-left">
+            <th className="pb-3 font-semibold">Variety</th>
+            <th className="pb-3 font-semibold">Qty</th>
+            <th className="pb-3 font-semibold">Price</th>
+            <th className="pb-3 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {products.map((p) => (
+            <tr key={p._id} className="hover:bg-gray-50">
+              <td className="py-3 font-medium">{p.variety}</td>
+              <td className="py-3">{p.quantity_kg}kg</td>
+              <td className="py-3 font-semibold">
+                {formatCurrency(p.price_per_kg)}
+              </td>
+              <td className="py-3 text-right">
+                <button
+                  onClick={async () => {
+                    if (!confirm('Remove?')) return;
+                    await adminService.deleteProduct(p._id);
+                    fetch();
+                  }}
+                  className="text-red-400 hover:text-red-600 p-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

@@ -21,7 +21,10 @@ async def general_exception_handler(_: Request, exc: Exception):
     logger.exception("Unhandled application error", exc_info=exc)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "An unexpected error occurred", "message": "Internal server error"},
+        content={
+            "detail": "An unexpected error occurred",
+            "message": "Internal server error",
+        },
     )
 
 

@@ -8,7 +8,9 @@ from app.services import auth_service
 router = APIRouter()
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
+)
 async def register(data: RegisterRequest):
     try:
         result = await auth_service.register_user(data)

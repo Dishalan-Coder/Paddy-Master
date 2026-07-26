@@ -30,32 +30,66 @@ const AdminOrdersPage = lazy(() => import('../pages/AdminOrdersPage'));
 const AdminPricesPage = lazy(() => import('../pages/AdminPricesPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
-const farmerOnly = (element) => <ProtectedRoute roles={['farmer']}>{element}</ProtectedRoute>;
+const farmerOnly = (element) => (
+  <ProtectedRoute roles={['farmer']}>{element}</ProtectedRoute>
+);
 
 export default function AppRoutes() {
   return (
     <Suspense fallback={<Loader fullScreen />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-        <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
+        <Route
+          path="/login"
+          element={
+            <AuthLayout>
+              <LoginPage />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <AuthLayout>
+              <RegisterPage />
+            </AuthLayout>
+          }
+        />
 
-        <Route element={<ProtectedRoute roles={['farmer', 'buyer']}><MainLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute roles={['farmer', 'buyer']}>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/farms" element={farmerOnly(<FarmsPage />)} />
           <Route path="/farms/new" element={farmerOnly(<AddFarmPage />)} />
           <Route path="/crops/new" element={farmerOnly(<AddCropPage />)} />
           <Route path="/crops" element={farmerOnly(<CropsPage />)} />
           <Route path="/expenses" element={farmerOnly(<ExpensesPage />)} />
-          <Route path="/recommendations" element={farmerOnly(<RecommendationsPage />)} />
+          <Route
+            path="/recommendations"
+            element={farmerOnly(<RecommendationsPage />)}
+          />
           <Route path="/prices-weather" element={<WeatherPricesPage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
-          <Route path="/products/new" element={farmerOnly(<AddProductPage />)} />
+          <Route
+            path="/products/new"
+            element={farmerOnly(<AddProductPage />)}
+          />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
         </Route>
 
-        <Route element={<ProtectedRoute roles={['admin']}><AdminLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
@@ -63,7 +97,13 @@ export default function AppRoutes() {
           <Route path="/admin/prices" element={<AdminPricesPage />} />
         </Route>
 
-        <Route element={<ProtectedRoute roles={['farmer', 'buyer', 'admin']}><MainLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute roles={['farmer', 'buyer', 'admin']}>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
         </Route>

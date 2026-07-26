@@ -94,15 +94,23 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
     });
   };
 
-  const fieldError = (name) => (
-    errors[name] ? <p id={`${name}-error`} className="mt-1 text-xs font-semibold text-red-500">{errors[name]}</p> : null
-  );
+  const fieldError = (name) =>
+    errors[name] ? (
+      <p
+        id={`${name}-error`}
+        className="mt-1 text-xs font-semibold text-red-500"
+      >
+        {errors[name]}
+      </p>
+    ) : null;
 
   return (
     <form onSubmit={submit} className="space-y-5" noValidate>
       <ErrorAlert message={error} onDismiss={() => setError('')} />
       <div>
-        <label htmlFor="farm_name" className="label">Farm name</label>
+        <label htmlFor="farm_name" className="label">
+          Farm name
+        </label>
         <input
           id="farm_name"
           name="name"
@@ -116,7 +124,9 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
         {fieldError('name')}
       </div>
       <div>
-        <label htmlFor="farm_location" className="label">Location</label>
+        <label htmlFor="farm_location" className="label">
+          Location
+        </label>
         <input
           id="farm_location"
           name="location"
@@ -132,7 +142,9 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="farm_area" className="label">Area (acres)</label>
+          <label htmlFor="farm_area" className="label">
+            Area (acres)
+          </label>
           <input
             id="farm_area"
             name="area_acres"
@@ -144,26 +156,50 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
             className={fieldClass(errors, 'area_acres')}
             inputMode="decimal"
             aria-invalid={Boolean(errors.area_acres)}
-            aria-describedby={errors.area_acres ? 'area_acres-error' : undefined}
+            aria-describedby={
+              errors.area_acres ? 'area_acres-error' : undefined
+            }
           />
           {fieldError('area_acres')}
         </div>
         <div>
-          <label htmlFor="farm_soil" className="label">Soil type</label>
-          <select id="farm_soil" name="soil_type" value={form.soil_type} onChange={change} className="input-field">
+          <label htmlFor="farm_soil" className="label">
+            Soil type
+          </label>
+          <select
+            id="farm_soil"
+            name="soil_type"
+            value={form.soil_type}
+            onChange={change}
+            className="input-field"
+          >
             <option value="">Select soil type</option>
-            {SOIL_TYPES.map((soilType) => <option key={soilType}>{soilType}</option>)}
+            {SOIL_TYPES.map((soilType) => (
+              <option key={soilType}>{soilType}</option>
+            ))}
           </select>
         </div>
       </div>
       <div>
-        <label htmlFor="farm_district" className="label">District</label>
-        <select id="farm_district" name="district" value={form.district} onChange={change} className="input-field">
+        <label htmlFor="farm_district" className="label">
+          District
+        </label>
+        <select
+          id="farm_district"
+          name="district"
+          value={form.district}
+          onChange={change}
+          className="input-field"
+        >
           <option value="">Select district</option>
-          {DISTRICTS.map((district) => <option key={district}>{district}</option>)}
+          {DISTRICTS.map((district) => (
+            <option key={district}>{district}</option>
+          ))}
         </select>
       </div>
-      <Button type="submit" loading={loading}>Save farm</Button>
+      <Button type="submit" loading={loading}>
+        Save farm
+      </Button>
     </form>
   );
 }

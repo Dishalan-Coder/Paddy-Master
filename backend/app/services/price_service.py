@@ -27,9 +27,13 @@ async def get_latest_prices() -> Dict[str, Any]:
         }
 
     seven_days_ago = (today - timedelta(days=7)).isoformat()
-    trend = await db.market_prices.find(
-        {"region": "national", "date": {"$gte": seven_days_ago}}
-    ).sort("date", 1).to_list(10)
+    trend = (
+        await db.market_prices.find(
+            {"region": "national", "date": {"$gte": seven_days_ago}}
+        )
+        .sort("date", 1)
+        .to_list(10)
+    )
     if not trend:
         trend = [latest]
 

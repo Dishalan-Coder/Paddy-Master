@@ -11,7 +11,9 @@ export default function NotFoundPage() {
         </div>
         <h1 className="mb-2 text-4xl font-bold">404</h1>
         <p className="mb-6 text-gray-500">Page not found.</p>
-        <Link to="/dashboard" className="btn-primary">Go Home</Link>
+        <Link to="/dashboard" className="btn-primary">
+          Go Home
+        </Link>
       </main>
       <Footer variant="app" className="mx-5 mb-6 lg:mx-8" />
     </div>

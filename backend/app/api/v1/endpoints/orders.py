@@ -29,7 +29,9 @@ async def farmer_orders(user=Depends(require_farmer)):
 
 
 @router.patch("/{order_id}/status")
-async def update_status(order_id: str, status_data: dict, user=Depends(get_current_user)):
+async def update_status(
+    order_id: str, status_data: dict, user=Depends(get_current_user)
+):
     new_status = status_data.get("status")
     if not new_status:
         raise HTTPException(status_code=400, detail="Status field required")

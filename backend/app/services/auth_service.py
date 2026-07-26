@@ -15,7 +15,9 @@ async def register_user(data: RegisterRequest) -> dict:
     db = get_database_or_raise()
     email = str(data.email).lower()
 
-    existing = await db.users.find_one({"$or": [{"email": email}, {"phone": data.phone}]})
+    existing = await db.users.find_one(
+        {"$or": [{"email": email}, {"phone": data.phone}]}
+    )
     if existing:
         field = "email" if existing.get("email") == email else "phone"
         raise ValueError(f"{field} already registered")

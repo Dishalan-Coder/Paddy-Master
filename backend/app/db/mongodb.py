@@ -17,7 +17,9 @@ class DatabaseUnavailableError(RuntimeError):
 async def connect_db() -> None:
     global client, db
     try:
-        candidate = AsyncIOMotorClient(settings.MONGO_URI, serverSelectionTimeoutMS=5000)
+        candidate = AsyncIOMotorClient(
+            settings.MONGO_URI, serverSelectionTimeoutMS=5000
+        )
         await candidate.admin.command("ping")
         client = candidate
         db = client[settings.DB_NAME]

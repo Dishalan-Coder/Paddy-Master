@@ -86,11 +86,13 @@ async def confirm_bank_transfer(order_id: str) -> dict:
     now = datetime.now(timezone.utc)
     result = await db.orders.find_one_and_update(
         {"_id": oid, "payment_status": PaymentStatus.PROCESSING.value},
-        {"$set": {
-            "payment_status": PaymentStatus.PAID.value,
-            "paid_at": now,
-            "updated_at": now,
-        }},
+        {
+            "$set": {
+                "payment_status": PaymentStatus.PAID.value,
+                "paid_at": now,
+                "updated_at": now,
+            }
+        },
         return_document=ReturnDocument.AFTER,
     )
     if not result:
@@ -105,7 +107,10 @@ async def confirm_bank_transfer(order_id: str) -> dict:
         if credit_claim:
             await db.users.update_one(
                 {"_id": result["farmer_id"]},
-                {"$inc": {"wallet_balance": result["total_price"]}, "$set": {"updated_at": now}},
+                {
+                    "$inc": {"wallet_balance": result["total_price"]},
+                    "$set": {"updated_at": now},
+                },
             )
             result["wallet_credited"] = True
 

@@ -1,5 +1,67 @@
-export const GROWTH_STAGES = ['planted','germination','tillering','stem_elongation','booting','heading','flowering','grain_filling','maturity','harvested'];
-export const EXPENSE_CATEGORIES = ['seeds','fertilizer','pesticide','labor','irrigation','equipment','transport','other'];
-export const PADDY_VARIETIES = ['Nadu','Samba','Kuruvikan','Basmati','Red Rice','K.Samba','Suwandel','Pachchaiperumal'];
-export const DISTRICTS = ['Anuradhapura','Polonnaruwa','Kurunegala','Hambantota','Ampara','Mannar','Trincomalee','Batticaloa','Jaffna','Kilinochchi','Mullaitivu','Vavuniya','Puttalam','Kandy','Matale','Nuwara Eliya','Badulla','Monaragala','Ratnapura','Kegalle','Colombo','Gampaha','Kalutara','Galle','Matara'];
-export const SOIL_TYPES = ['Clay Loam','Sandy Loam','Silty Clay','Alluvial','Reddish Brown','Other'];
+export const GROWTH_STAGES = [
+  'planted',
+  'germination',
+  'tillering',
+  'stem_elongation',
+  'booting',
+  'heading',
+  'flowering',
+  'grain_filling',
+  'maturity',
+  'harvested',
+];
+export const EXPENSE_CATEGORIES = [
+  'seeds',
+  'fertilizer',
+  'pesticide',
+  'labor',
+  'irrigation',
+  'equipment',
+  'transport',
+  'other',
+];
+export const PADDY_VARIETIES = [
+  'Nadu',
+  'Samba',
+  'Kuruvikan',
+  'Basmati',
+  'Red Rice',
+  'K.Samba',
+  'Suwandel',
+  'Pachchaiperumal',
+];
+export const DISTRICTS = [
+  'Anuradhapura',
+  'Polonnaruwa',
+  'Kurunegala',
+  'Hambantota',
+  'Ampara',
+  'Mannar',
+  'Trincomalee',
+  'Batticaloa',
+  'Jaffna',
+  'Kilinochchi',
+  'Mullaitivu',
+  'Vavuniya',
+  'Puttalam',
+  'Kandy',
+  'Matale',
+  'Nuwara Eliya',
+  'Badulla',
+  'Monaragala',
+  'Ratnapura',
+  'Kegalle',
+  'Colombo',
+  'Gampaha',
+  'Kalutara',
+  'Galle',
+  'Matara',
+];
+export const SOIL_TYPES = [
+  'Clay Loam',
+  'Sandy Loam',
+  'Silty Clay',
+  'Alluvial',
+  'Reddish Brown',
+  'Other',
+];

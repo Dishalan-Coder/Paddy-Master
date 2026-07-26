@@ -21,12 +21,30 @@ FARMER_TRANSITIONS = {
 }
 
 ADMIN_TRANSITIONS = {
-    OrderStatus.PENDING.value: {OrderStatus.CONFIRMED.value, OrderStatus.CANCELLED.value, OrderStatus.DISPUTED.value},
-    OrderStatus.CONFIRMED.value: {OrderStatus.PICKUP_SCHEDULED.value, OrderStatus.CANCELLED.value, OrderStatus.DISPUTED.value},
-    OrderStatus.PICKUP_SCHEDULED.value: {OrderStatus.IN_TRANSIT.value, OrderStatus.CANCELLED.value, OrderStatus.DISPUTED.value},
-    OrderStatus.IN_TRANSIT.value: {OrderStatus.DELIVERED.value, OrderStatus.DISPUTED.value},
+    OrderStatus.PENDING.value: {
+        OrderStatus.CONFIRMED.value,
+        OrderStatus.CANCELLED.value,
+        OrderStatus.DISPUTED.value,
+    },
+    OrderStatus.CONFIRMED.value: {
+        OrderStatus.PICKUP_SCHEDULED.value,
+        OrderStatus.CANCELLED.value,
+        OrderStatus.DISPUTED.value,
+    },
+    OrderStatus.PICKUP_SCHEDULED.value: {
+        OrderStatus.IN_TRANSIT.value,
+        OrderStatus.CANCELLED.value,
+        OrderStatus.DISPUTED.value,
+    },
+    OrderStatus.IN_TRANSIT.value: {
+        OrderStatus.DELIVERED.value,
+        OrderStatus.DISPUTED.value,
+    },
     OrderStatus.DELIVERED.value: set(),
-    OrderStatus.DISPUTED.value: {OrderStatus.DELIVERED.value, OrderStatus.CANCELLED.value},
+    OrderStatus.DISPUTED.value: {
+        OrderStatus.DELIVERED.value,
+        OrderStatus.CANCELLED.value,
+    },
     OrderStatus.CANCELLED.value: set(),
 }
 
@@ -62,7 +80,13 @@ async def create_order(buyer_id, data: OrderCreate) -> dict:
     if remaining <= 0:
         await db.products.update_one(
             {"_id": product_id},
-            {"$set": {"quantity_kg": 0, "status": ProductStatus.SOLD.value, "updated_at": now}},
+            {
+                "$set": {
+                    "quantity_kg": 0,
+                    "status": ProductStatus.SOLD.value,
+                    "updated_at": now,
+                }
+            },
         )
 
     payment_method = data.payment_method.value
@@ -92,7 +116,10 @@ async def create_order(buyer_id, data: OrderCreate) -> dict:
             {"_id": product_id},
             {
                 "$inc": {"quantity_kg": quantity},
-                "$set": {"status": ProductStatus.ACTIVE.value, "updated_at": datetime.now(timezone.utc)},
+                "$set": {
+                    "status": ProductStatus.ACTIVE.value,
+                    "updated_at": datetime.now(timezone.utc),
+                },
             },
         )
         raise
@@ -122,7 +149,9 @@ async def _enrich_orders(db, orders: List[dict], include_buyer: bool) -> List[di
     if not orders:
         return []
     product_ids = list({o["product_id"] for o in orders})
-    user_ids = list({o["buyer_id"] if include_buyer else o["farmer_id"] for o in orders})
+    user_ids = list(
+        {o["buyer_id"] if include_buyer else o["farmer_id"] for o in orders}
+    )
     products = await db.products.find(
         {"_id": {"$in": product_ids}},
         {"variety": 1, "image_urls": 1, "district": 1},
@@ -137,7 +166,9 @@ async def _enrich_orders(db, orders: List[dict], include_buyer: bool) -> List[di
     for order in orders:
         product = product_map.get(order["product_id"], {})
         order["product_variety"] = product.get("variety", "Unknown")
-        order["product_image_url"] = resolve_file_url((product.get("image_urls") or [None])[0])
+        order["product_image_url"] = resolve_file_url(
+            (product.get("image_urls") or [None])[0]
+        )
         user_key = order["buyer_id"] if include_buyer else order["farmer_id"]
         profile = user_map.get(user_key, {})
         if include_buyer:
@@ -152,17 +183,25 @@ async def _enrich_orders(db, orders: List[dict], include_buyer: bool) -> List[di
 
 async def get_buyer_orders(buyer_id) -> List[dict]:
     db = get_database_or_raise()
-    orders = await db.orders.find({"buyer_id": buyer_id}).sort("created_at", -1).to_list(100)
+    orders = (
+        await db.orders.find({"buyer_id": buyer_id}).sort("created_at", -1).to_list(100)
+    )
     return await _enrich_orders(db, orders, include_buyer=False)
 
 
 async def get_farmer_orders(farmer_id) -> List[dict]:
     db = get_database_or_raise()
-    orders = await db.orders.find({"farmer_id": farmer_id}).sort("created_at", -1).to_list(100)
+    orders = (
+        await db.orders.find({"farmer_id": farmer_id})
+        .sort("created_at", -1)
+        .to_list(100)
+    )
     return await _enrich_orders(db, orders, include_buyer=True)
 
 
-async def update_order_status(order_id: str, user: dict, new_status: str) -> Optional[dict]:
+async def update_order_status(
+    order_id: str, user: dict, new_status: str
+) -> Optional[dict]:
     db = get_database_or_raise()
     oid = object_id_or_none(order_id)
     if oid is None:
@@ -210,7 +249,10 @@ async def update_order_status(order_id: str, user: dict, new_status: str) -> Opt
             set_fields["payment_status"] = PaymentStatus.REFUNDED.value
         elif order.get("payment_status") == PaymentStatus.PROCESSING.value:
             set_fields["payment_status"] = PaymentStatus.FAILED.value
-    if new_status == OrderStatus.DELIVERED.value and order.get("payment_method") == PaymentMethod.CASH_ON_DELIVERY.value:
+    if (
+        new_status == OrderStatus.DELIVERED.value
+        and order.get("payment_method") == PaymentMethod.CASH_ON_DELIVERY.value
+    ):
         set_fields.update({"payment_status": PaymentStatus.PAID.value, "paid_at": now})
 
     result = await db.orders.find_one_and_update(
@@ -238,7 +280,10 @@ async def update_order_status(order_id: str, user: dict, new_status: str) -> Opt
         if credit_claim:
             await db.users.update_one(
                 {"_id": order["farmer_id"]},
-                {"$inc": {"wallet_balance": order["total_price"]}, "$set": {"updated_at": now}},
+                {
+                    "$inc": {"wallet_balance": order["total_price"]},
+                    "$set": {"updated_at": now},
+                },
             )
             result["wallet_credited"] = True
 

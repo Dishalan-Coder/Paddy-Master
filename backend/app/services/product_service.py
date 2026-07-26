@@ -15,7 +15,11 @@ ALLOWED_SORT_FIELDS = {"created_at", "price_per_kg", "quantity_kg", "variety", "
 
 def _present_product(product: dict) -> dict:
     product = dict(product)
-    product["image_urls"] = [url for url in (resolve_file_url(value) for value in product.get("image_urls", [])) if url]
+    product["image_urls"] = [
+        url
+        for url in (resolve_file_url(value) for value in product.get("image_urls", []))
+        if url
+    ]
     return product
 
 
@@ -23,15 +27,17 @@ async def create_product(farmer_id, data: ProductCreate) -> dict:
     db = get_database_or_raise()
     now = datetime.now(timezone.utc)
     doc = data.model_dump(mode="json")
-    doc.update({
-        "farmer_id": farmer_id,
-        "status": ProductStatus.ACTIVE.value,
-        "views": 0,
-        "rating": 0.0,
-        "total_reviews": 0,
-        "created_at": now,
-        "updated_at": now,
-    })
+    doc.update(
+        {
+            "farmer_id": farmer_id,
+            "status": ProductStatus.ACTIVE.value,
+            "views": 0,
+            "rating": 0.0,
+            "total_reviews": 0,
+            "created_at": now,
+            "updated_at": now,
+        }
+    )
     result = await db.products.insert_one(doc)
     doc["_id"] = result.inserted_id
     return serialize_document(_present_product(doc))
@@ -39,7 +45,11 @@ async def create_product(farmer_id, data: ProductCreate) -> dict:
 
 async def get_farmer_products(farmer_id) -> List[dict]:
     db = get_database_or_raise()
-    products = await db.products.find({"farmer_id": farmer_id}).sort("created_at", -1).to_list(100)
+    products = (
+        await db.products.find({"farmer_id": farmer_id})
+        .sort("created_at", -1)
+        .to_list(100)
+    )
     return serialize_document([_present_product(product) for product in products])
 
 
@@ -76,7 +86,13 @@ async def get_all_products(
     sort_field = sort_by if sort_by in ALLOWED_SORT_FIELDS else "created_at"
     direction = 1 if sort_order == 1 else -1
     total = await db.products.count_documents(query)
-    products = await db.products.find(query).sort(sort_field, direction).skip(skip).limit(limit).to_list(limit)
+    products = (
+        await db.products.find(query)
+        .sort(sort_field, direction)
+        .skip(skip)
+        .limit(limit)
+        .to_list(limit)
+    )
 
     farmer_ids = list({p.get("farmer_id") for p in products if p.get("farmer_id")})
     farmer_map = {}
@@ -89,12 +105,18 @@ async def get_all_products(
 
     for product in products:
         farmer = farmer_map.get(product.get("farmer_id"))
-        product["farmer_name"] = farmer.get("full_name", "Unknown") if farmer else "Unknown"
+        product["farmer_name"] = (
+            farmer.get("full_name", "Unknown") if farmer else "Unknown"
+        )
         product["farmer_rating"] = farmer.get("rating", 0.0) if farmer else 0.0
-        product["farmer_verified"] = farmer.get("is_verified", False) if farmer else False
+        product["farmer_verified"] = (
+            farmer.get("is_verified", False) if farmer else False
+        )
 
     return {
-        "products": serialize_document([_present_product(product) for product in products]),
+        "products": serialize_document(
+            [_present_product(product) for product in products]
+        ),
         "total": total,
         "skip": skip,
         "limit": limit,
@@ -117,7 +139,14 @@ async def get_product_by_id(product_id: str) -> Optional[dict]:
 
     farmer = await db.users.find_one(
         {"_id": product.get("farmer_id")},
-        {"full_name": 1, "rating": 1, "total_reviews": 1, "district": 1, "phone": 1, "is_verified": 1},
+        {
+            "full_name": 1,
+            "rating": 1,
+            "total_reviews": 1,
+            "district": 1,
+            "phone": 1,
+            "is_verified": 1,
+        },
     )
     product["farmer_name"] = farmer.get("full_name", "Unknown") if farmer else "Unknown"
     product["farmer_rating"] = farmer.get("rating", 0.0) if farmer else 0.0
@@ -126,7 +155,9 @@ async def get_product_by_id(product_id: str) -> Optional[dict]:
     return serialize_document(_present_product(product))
 
 
-async def update_product(product_id: str, farmer_id, data: ProductUpdate) -> Optional[dict]:
+async def update_product(
+    product_id: str, farmer_id, data: ProductUpdate
+) -> Optional[dict]:
     db = get_database_or_raise()
     oid = object_id_or_none(product_id)
     if oid is None:

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import api from '../src/services/api';
-import profileService, { buildProfileUpdatePayload } from '../src/services/profileService';
+import profileService, {
+  buildProfileUpdatePayload,
+} from '../src/services/profileService';
 
 vi.mock('../src/services/api', () => ({
   default: {
@@ -12,15 +14,17 @@ vi.mock('../src/services/api', () => ({
 
 describe('profileService', () => {
   it('builds a trimmed profile update payload', () => {
-    expect(buildProfileUpdatePayload({
-      full_name: '  Jane Farmer  ',
-      phone: ' 0771234567 ',
-      email: ' JANE@example.COM ',
-      district: ' Colombo ',
-      address: '  Main Road ',
-      bio: '  Seed paddy supplier. ',
-      role: 'admin',
-    })).toEqual({
+    expect(
+      buildProfileUpdatePayload({
+        full_name: '  Jane Farmer  ',
+        phone: ' 0771234567 ',
+        email: ' JANE@example.COM ',
+        district: ' Colombo ',
+        address: '  Main Road ',
+        bio: '  Seed paddy supplier. ',
+        role: 'admin',
+      }),
+    ).toEqual({
       full_name: 'Jane Farmer',
       phone: '0771234567',
       email: 'jane@example.com',

@@ -1,4 +1,10 @@
-import { AlertCircle, Clock, DollarSign, ShoppingBag, Users } from 'lucide-react';
+import {
+  AlertCircle,
+  Clock,
+  DollarSign,
+  ShoppingBag,
+  Users,
+} from 'lucide-react';
 import AdminCharts from '../components/admin/AdminCharts';
 import ErrorAlert from '../components/common/ErrorAlert';
 import Loader from '../components/common/Loader';
@@ -18,7 +24,10 @@ const emptyAnalytics = {
 };
 
 export default function AdminDashboardPage() {
-  const { data, loading, error, refetch } = useFetch(() => adminService.getAnalytics(), []);
+  const { data, loading, error, refetch } = useFetch(
+    () => adminService.getAnalytics(),
+    [],
+  );
 
   if (loading) return <Loader />;
 
@@ -29,7 +38,11 @@ export default function AdminDashboardPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Admin Overview</h1>
         {error && (
-          <button type="button" className="text-sm font-medium text-green-700 underline" onClick={refetch}>
+          <button
+            type="button"
+            className="text-sm font-medium text-green-700 underline"
+            onClick={refetch}
+          >
             Retry
           </button>
         )}
@@ -37,10 +50,29 @@ export default function AdminDashboardPage() {
       <ErrorAlert message={error} />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatsCard title="Farmers" value={analytics.active_farmers.toLocaleString()} icon={Users} />
-        <StatsCard title="Buyers" value={analytics.active_buyers.toLocaleString()} icon={ShoppingBag} color="blue" />
-        <StatsCard title="GMV" value={formatCurrency(analytics.monthly_gmv)} icon={DollarSign} color="paddy" />
-        <StatsCard title="Disputes" value={analytics.open_disputes} icon={AlertCircle} color="red" />
+        <StatsCard
+          title="Farmers"
+          value={analytics.active_farmers.toLocaleString()}
+          icon={Users}
+        />
+        <StatsCard
+          title="Buyers"
+          value={analytics.active_buyers.toLocaleString()}
+          icon={ShoppingBag}
+          color="blue"
+        />
+        <StatsCard
+          title="GMV"
+          value={formatCurrency(analytics.monthly_gmv)}
+          icon={DollarSign}
+          color="paddy"
+        />
+        <StatsCard
+          title="Disputes"
+          value={analytics.open_disputes}
+          icon={AlertCircle}
+          color="red"
+        />
       </div>
 
       <div className="card">

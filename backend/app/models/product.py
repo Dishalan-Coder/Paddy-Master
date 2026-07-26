@@ -27,7 +27,9 @@ class ProductCreate(BaseModel):
     rating: float = 0.0
     total_reviews: int = 0
 
-    @field_validator("variety", "region", "district", "harvest_date", "description", mode="before")
+    @field_validator(
+        "variety", "region", "district", "harvest_date", "description", mode="before"
+    )
     @classmethod
     def strip_text(cls, value):
         if not isinstance(value, str):
@@ -48,7 +50,9 @@ class ProductUpdate(BaseModel):
     status: Optional[ProductStatus] = None
     image_urls: Optional[List[str]] = None
 
-    @field_validator("variety", "region", "district", "harvest_date", "description", mode="before")
+    @field_validator(
+        "variety", "region", "district", "harvest_date", "description", mode="before"
+    )
     @classmethod
     def strip_update_text(cls, value):
         if not isinstance(value, str):

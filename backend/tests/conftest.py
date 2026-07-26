@@ -35,11 +35,13 @@ class FakeCollection:
     @staticmethod
     def _matches(document, query):
         for key, expected in query.items():
-            if key == '$or':
-                if not any(FakeCollection._matches(document, option) for option in expected):
+            if key == "$or":
+                if not any(
+                    FakeCollection._matches(document, option) for option in expected
+                ):
                     return False
-            elif isinstance(expected, dict) and '$ne' in expected:
-                if document.get(key) == expected['$ne']:
+            elif isinstance(expected, dict) and "$ne" in expected:
+                if document.get(key) == expected["$ne"]:
                     return False
             elif document.get(key) != expected:
                 return False
@@ -53,7 +55,11 @@ class FakeCollection:
                     included = {key for key, value in projection.items() if value}
                     excluded = {key for key, value in projection.items() if not value}
                     if included:
-                        result = {key: value for key, value in result.items() if key in included or key == '_id'}
+                        result = {
+                            key: value
+                            for key, value in result.items()
+                            if key in included or key == "_id"
+                        }
                     for key in excluded:
                         result.pop(key, None)
                 return result
@@ -61,16 +67,16 @@ class FakeCollection:
 
     async def insert_one(self, document):
         stored = deepcopy(document)
-        stored['_id'] = ObjectId()
+        stored["_id"] = ObjectId()
         self.documents.append(stored)
-        return SimpleNamespace(inserted_id=stored['_id'])
+        return SimpleNamespace(inserted_id=stored["_id"])
 
     async def find_one_and_update(self, query, update, **_kwargs):
         for index, document in enumerate(self.documents):
             if self._matches(document, query):
                 stored = deepcopy(document)
-                if '$set' in update:
-                    stored.update(deepcopy(update['$set']))
+                if "$set" in update:
+                    stored.update(deepcopy(update["$set"]))
                 self.documents[index] = stored
                 return deepcopy(stored)
         return None
@@ -82,8 +88,8 @@ class FakeCollection:
             if self._matches(document, query):
                 matched = 1
                 stored = deepcopy(document)
-                if '$set' in update:
-                    stored.update(deepcopy(update['$set']))
+                if "$set" in update:
+                    stored.update(deepcopy(update["$set"]))
                     modified = 1
                 self.documents[index] = stored
                 break
@@ -94,7 +100,11 @@ class FakeCollection:
 
     def find(self, query=None, projection=None):
         query = query or {}
-        documents = [deepcopy(document) for document in self.documents if self._matches(document, query)]
+        documents = [
+            deepcopy(document)
+            for document in self.documents
+            if self._matches(document, query)
+        ]
         if projection:
             for document in documents:
                 for key, value in projection.items():
@@ -120,6 +130,6 @@ class FakeDatabase:
 @pytest.fixture(autouse=True)
 def fake_database(monkeypatch):
     database = FakeDatabase()
-    monkeypatch.setattr(mongodb, 'db', database)
+    monkeypatch.setattr(mongodb, "db", database)
     yield database
-    monkeypatch.setattr(mongodb, 'db', None)
+    monkeypatch.setattr(mongodb, "db", None)

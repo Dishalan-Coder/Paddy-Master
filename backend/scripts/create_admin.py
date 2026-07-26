@@ -37,7 +37,9 @@ async def create_admin(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Create or update a Paddy Master admin")
+    parser = argparse.ArgumentParser(
+        description="Create or update a Paddy Master admin"
+    )
     parser.add_argument("--name", required=True)
     parser.add_argument("--email", required=True)
     parser.add_argument("--phone", required=True)

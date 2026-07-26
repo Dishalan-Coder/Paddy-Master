@@ -2,7 +2,16 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 
 from app.middleware.auth_middleware import get_current_user
 from app.middleware.role_middleware import require_farmer
@@ -34,10 +43,14 @@ async def create_product(
     for image in images:
         content_type = image.content_type or "application/octet-stream"
         if content_type not in ALLOWED_IMAGE_TYPES:
-            raise HTTPException(status_code=400, detail=f"Unsupported image type: {content_type}")
+            raise HTTPException(
+                status_code=400, detail=f"Unsupported image type: {content_type}"
+            )
         content = await image.read(MAX_IMAGE_SIZE + 1)
         if len(content) > MAX_IMAGE_SIZE:
-            raise HTTPException(status_code=400, detail="Each image must be 5 MB or smaller")
+            raise HTTPException(
+                status_code=400, detail="Each image must be 5 MB or smaller"
+            )
         key = s3_service.upload_file(content, "products", content_type)
         if key:
             image_urls.append(key)
@@ -76,7 +89,9 @@ async def list_products(
     user=Depends(get_current_user),
 ):
     if min_price is not None and max_price is not None and min_price > max_price:
-        raise HTTPException(status_code=400, detail="Minimum price cannot exceed maximum price")
+        raise HTTPException(
+            status_code=400, detail="Minimum price cannot exceed maximum price"
+        )
     return await product_service.get_all_products(
         variety=variety,
         region=region,
@@ -100,7 +115,9 @@ async def get_product(product_id: str, user=Depends(get_current_user)):
 
 
 @router.put("/{product_id}")
-async def update_product(product_id: str, data: ProductUpdate, user=Depends(require_farmer)):
+async def update_product(
+    product_id: str, data: ProductUpdate, user=Depends(require_farmer)
+):
     product = await product_service.update_product(product_id, user["_id"], data)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
