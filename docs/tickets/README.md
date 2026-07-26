@@ -28,3 +28,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-024-ui-add-expense-form.md) - UI: Add Expense Form (Development)
 - [PM](PM-025-ui-expense-list-table.md) - UI: Expense List Table (Development)
 - [PM](PM-026-ui-profit-loss-display.md) - UI: Profit/Loss Display (Development)
+- [PM](PM-027-api-add-expense.md) - API: Add Expense (Development)
