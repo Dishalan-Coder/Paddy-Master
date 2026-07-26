@@ -33,3 +33,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-029-api-calculate-profit-loss.md) - API: Calculate Profit/Loss (Development)
 - [PM](PM-030-ui-weather-display-card.md) - UI: Weather Display Card (Development)
 - [PM](PM-031-ui-market-price-list.md) - UI: Market Price List (Development)
+- [PM](PM-032-api-fetch-weather-api-external.md) - API: Fetch Weather API (External) (Development)
