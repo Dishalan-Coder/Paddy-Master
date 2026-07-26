@@ -8,7 +8,9 @@ from jose import JWTError, jwt
 from app.core.config import settings
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
@@ -19,7 +21,9 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
 
 def verify_token(token: str) -> Optional[Dict[str, Any]]:
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
         return payload
     except JWTError:
         return None

@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import authService from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -46,7 +53,10 @@ export function AuthProvider({ children }) {
     return normalized;
   }, []);
 
-  const refreshProfile = useCallback(async () => persistUser(await authService.getProfile()), [persistUser]);
+  const refreshProfile = useCallback(
+    async () => persistUser(await authService.getProfile()),
+    [persistUser],
+  );
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -76,11 +86,22 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = async (credentials) => saveSession(await authService.login(credentials));
-  const register = async (details) => saveSession(await authService.register(details));
+  const login = async (credentials) =>
+    saveSession(await authService.login(credentials));
+  const register = async (details) =>
+    saveSession(await authService.register(details));
 
   const value = useMemo(
-    () => ({ user, token, loading, login, register, logout, refreshProfile, setUser: persistUser }),
+    () => ({
+      user,
+      token,
+      loading,
+      login,
+      register,
+      logout,
+      refreshProfile,
+      setUser: persistUser,
+    }),
     [user, token, loading, logout, refreshProfile, persistUser],
   );
 

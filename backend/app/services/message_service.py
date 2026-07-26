@@ -7,7 +7,9 @@ from app.db.mongodb import get_database_or_raise
 from app.utils.mongo import object_id_or_none, serialize_document
 
 
-async def send_message(conversation_id: str, sender_id, receiver_id: str, content: str) -> dict:
+async def send_message(
+    conversation_id: str, sender_id, receiver_id: str, content: str
+) -> dict:
     db = get_database_or_raise()
     receiver_oid = object_id_or_none(receiver_id)
     if receiver_oid is None or not await db.users.find_one({"_id": receiver_oid}):
@@ -34,10 +36,16 @@ async def send_message(conversation_id: str, sender_id, receiver_id: str, conten
 
 async def get_messages(conversation_id: str, user_id) -> List[dict]:
     db = get_database_or_raise()
-    messages = await db.messages.find({
-        "conversation_id": conversation_id,
-        "$or": [{"sender_id": user_id}, {"receiver_id": user_id}],
-    }).sort("created_at", 1).to_list(200)
+    messages = (
+        await db.messages.find(
+            {
+                "conversation_id": conversation_id,
+                "$or": [{"sender_id": user_id}, {"receiver_id": user_id}],
+            }
+        )
+        .sort("created_at", 1)
+        .to_list(200)
+    )
     await db.messages.update_many(
         {"conversation_id": conversation_id, "receiver_id": user_id, "is_read": False},
         {"$set": {"is_read": True}},

@@ -4,5 +4,9 @@ import FarmerDashboardPage from './FarmerDashboardPage';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  return user?.role === 'buyer' ? <BuyerDashboardPage /> : <FarmerDashboardPage />;
+  return user?.role === 'buyer' ? (
+    <BuyerDashboardPage />
+  ) : (
+    <FarmerDashboardPage />
+  );
 }

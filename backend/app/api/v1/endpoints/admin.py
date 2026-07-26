@@ -23,7 +23,12 @@ async def get_all_users(
     db = get_database_or_raise()
     query = {"role": role} if role else {}
     total = await db.users.count_documents(query)
-    users = await db.users.find(query, {"hashed_password": 0}).skip(skip).limit(limit).to_list(limit)
+    users = (
+        await db.users.find(query, {"hashed_password": 0})
+        .skip(skip)
+        .limit(limit)
+        .to_list(limit)
+    )
     return {"users": serialize_document(users), "total": total}
 
 
@@ -34,7 +39,9 @@ async def delete_user(user_id: str, admin=Depends(require_admin)):
     if oid is None:
         raise HTTPException(status_code=404, detail="User not found")
     if oid == admin["_id"]:
-        raise HTTPException(status_code=400, detail="You cannot delete your own admin account")
+        raise HTTPException(
+            status_code=400, detail="You cannot delete your own admin account"
+        )
     result = await db.users.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
@@ -52,7 +59,9 @@ async def get_all_products(
     total = await db.products.count_documents(query)
     products = await db.products.find(query).skip(skip).limit(limit).to_list(limit)
     for product in products:
-        product["image_urls"] = [resolve_file_url(value) for value in product.get("image_urls", [])]
+        product["image_urls"] = [
+            resolve_file_url(value) for value in product.get("image_urls", [])
+        ]
     return {"products": serialize_document(products), "total": total}
 
 
@@ -77,11 +86,38 @@ async def get_all_orders(
     db = get_database_or_raise()
     query = {"status": status_filter} if status_filter else {}
     total = await db.orders.count_documents(query)
-    orders = await db.orders.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
-    user_ids = list({value for order in orders for value in (order.get("buyer_id"), order.get("farmer_id")) if value})
-    product_ids = list({order.get("product_id") for order in orders if order.get("product_id")})
-    users = await db.users.find({"_id": {"$in": user_ids}}, {"full_name": 1}).to_list(len(user_ids)) if user_ids else []
-    products = await db.products.find({"_id": {"$in": product_ids}}, {"variety": 1}).to_list(len(product_ids)) if product_ids else []
+    orders = (
+        await db.orders.find(query)
+        .sort("created_at", -1)
+        .skip(skip)
+        .limit(limit)
+        .to_list(limit)
+    )
+    user_ids = list(
+        {
+            value
+            for order in orders
+            for value in (order.get("buyer_id"), order.get("farmer_id"))
+            if value
+        }
+    )
+    product_ids = list(
+        {order.get("product_id") for order in orders if order.get("product_id")}
+    )
+    users = (
+        await db.users.find({"_id": {"$in": user_ids}}, {"full_name": 1}).to_list(
+            len(user_ids)
+        )
+        if user_ids
+        else []
+    )
+    products = (
+        await db.products.find({"_id": {"$in": product_ids}}, {"variety": 1}).to_list(
+            len(product_ids)
+        )
+        if product_ids
+        else []
+    )
     user_map = {item["_id"]: item.get("full_name", "Unknown") for item in users}
     product_map = {item["_id"]: item.get("variety", "Paddy") for item in products}
     for order in orders:

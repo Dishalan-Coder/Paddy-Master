@@ -15,7 +15,9 @@ class SendMessageRequest(BaseModel):
 
 
 @router.post("/{conversation_id}")
-async def send_message(conversation_id: str, data: SendMessageRequest, user=Depends(get_current_user)):
+async def send_message(
+    conversation_id: str, data: SendMessageRequest, user=Depends(get_current_user)
+):
     try:
         return await message_service.send_message(
             conversation_id, user["_id"], data.receiver_id, data.content

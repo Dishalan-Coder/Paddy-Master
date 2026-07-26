@@ -7,7 +7,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class MarketPriceCreate(BaseModel):
     date: date
-    prices: Dict[str, float] = Field(..., description="e.g. {'nadu': 112, 'samba': 118, 'k_samba': 121}")
+    prices: Dict[str, float] = Field(
+        ..., description="e.g. {'nadu': 112, 'samba': 118, 'k_samba': 121}"
+    )
     region: str = "national"
 
 

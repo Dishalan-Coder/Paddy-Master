@@ -34,15 +34,42 @@ async def create_notification(
 
 
 REMINDER_COPY = {
-    "planted": ("Irrigation reminder", "Keep the newly planted field evenly moist and check water depth."),
-    "germination": ("Irrigation reminder", "Maintain shallow water and inspect seedling establishment."),
-    "tillering": ("Fertilizer reminder", "Review the top-dressing schedule and monitor paddy leaf colour."),
-    "stem_elongation": ("Fertilizer reminder", "Check nitrogen and potassium needs before panicle initiation."),
-    "booting": ("Pest inspection", "Inspect the crop for stem borer, leaf folder, and fungal symptoms."),
-    "heading": ("Irrigation reminder", "Avoid water stress while panicles are emerging."),
-    "flowering": ("Crop protection", "Inspect pest pressure and avoid spraying during peak flowering."),
-    "grain_filling": ("Irrigation reminder", "Maintain adequate moisture, then reduce water gradually."),
-    "maturity": ("Harvest reminder", "Drain the field and confirm labour, bags, transport, and buyer plans."),
+    "planted": (
+        "Irrigation reminder",
+        "Keep the newly planted field evenly moist and check water depth.",
+    ),
+    "germination": (
+        "Irrigation reminder",
+        "Maintain shallow water and inspect seedling establishment.",
+    ),
+    "tillering": (
+        "Fertilizer reminder",
+        "Review the top-dressing schedule and monitor paddy leaf colour.",
+    ),
+    "stem_elongation": (
+        "Fertilizer reminder",
+        "Check nitrogen and potassium needs before panicle initiation.",
+    ),
+    "booting": (
+        "Pest inspection",
+        "Inspect the crop for stem borer, leaf folder, and fungal symptoms.",
+    ),
+    "heading": (
+        "Irrigation reminder",
+        "Avoid water stress while panicles are emerging.",
+    ),
+    "flowering": (
+        "Crop protection",
+        "Inspect pest pressure and avoid spraying during peak flowering.",
+    ),
+    "grain_filling": (
+        "Irrigation reminder",
+        "Maintain adequate moisture, then reduce water gradually.",
+    ),
+    "maturity": (
+        "Harvest reminder",
+        "Drain the field and confirm labour, bags, transport, and buyer plans.",
+    ),
 }
 
 
@@ -62,28 +89,41 @@ def _as_date(value):
 async def ensure_daily_crop_reminders(user_id) -> int:
     """Create deduplicated in-app reminders for active crops for the current day."""
     db = get_database_or_raise()
-    crops = await db.crops.find(
-        {"farmer_id": user_id, "growth_stage": {"$ne": "harvested"}}
-    ).sort("expected_harvest_date", 1).limit(20).to_list(20)
+    crops = (
+        await db.crops.find(
+            {"farmer_id": user_id, "growth_stage": {"$ne": "harvested"}}
+        )
+        .sort("expected_harvest_date", 1)
+        .limit(20)
+        .to_list(20)
+    )
     today = date.today()
     created = 0
 
     for crop in crops:
         stage = crop.get("growth_stage", "planted")
         title, message = REMINDER_COPY.get(
-            stage, ("Crop check reminder", "Inspect the field and update the crop growth stage.")
+            stage,
+            (
+                "Crop check reminder",
+                "Inspect the field and update the crop growth stage.",
+            ),
         )
         harvest_date = _as_date(crop.get("expected_harvest_date"))
         days_to_harvest = (harvest_date - today).days if harvest_date else None
-        reminder_type = "harvest" if days_to_harvest is not None and days_to_harvest <= 14 else stage
+        reminder_type = (
+            "harvest"
+            if days_to_harvest is not None and days_to_harvest <= 14
+            else stage
+        )
         if reminder_type == "harvest":
             title = "Harvest scheduling reminder"
             message = f"{crop.get('variety', 'Paddy')} is due for harvest in about {max(days_to_harvest, 0)} days. Confirm labour, bags, transport, and buyer arrangements."
 
         reminder_key = f"{today.isoformat()}:{crop['_id']}:{reminder_type}"
-        exists = await db.notifications.find_one({
-            "user_id": user_id, "metadata.reminder_key": reminder_key
-        })
+        exists = await db.notifications.find_one(
+            {"user_id": user_id, "metadata.reminder_key": reminder_key}
+        )
         if exists:
             continue
         await create_notification(
@@ -102,13 +142,22 @@ async def ensure_daily_crop_reminders(user_id) -> int:
     return created
 
 
-async def get_notifications(user_id, unread_only: bool = False, limit: int = 30) -> Dict[str, Any]:
+async def get_notifications(
+    user_id, unread_only: bool = False, limit: int = 30
+) -> Dict[str, Any]:
     db = get_database_or_raise()
     query: Dict[str, Any] = {"user_id": user_id}
     if unread_only:
         query["is_read"] = False
-    items = await db.notifications.find(query).sort("created_at", -1).limit(limit).to_list(limit)
-    unread_count = await db.notifications.count_documents({"user_id": user_id, "is_read": False})
+    items = (
+        await db.notifications.find(query)
+        .sort("created_at", -1)
+        .limit(limit)
+        .to_list(limit)
+    )
+    unread_count = await db.notifications.count_documents(
+        {"user_id": user_id, "is_read": False}
+    )
     return {"notifications": serialize_document(items), "unread_count": unread_count}
 
 

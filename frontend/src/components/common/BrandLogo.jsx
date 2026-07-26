@@ -19,7 +19,11 @@ const sizeClasses = {
   },
 };
 
-export default function BrandLogo({ className = '', size = 'md', showWordmark = true }) {
+export default function BrandLogo({
+  className = '',
+  size = 'md',
+  showWordmark = true,
+}) {
   const classes = sizeClasses[size] || sizeClasses.md;
 
   return (
@@ -34,7 +38,10 @@ export default function BrandLogo({ className = '', size = 'md', showWordmark = 
         <img
           src="/paddy-brand-wordmark.png"
           alt="Paddy Master"
-          className={clsx('shrink-0 rounded-md object-contain', classes.wordmark)}
+          className={clsx(
+            'shrink-0 rounded-md object-contain',
+            classes.wordmark,
+          )}
         />
       ) : (
         <span className="sr-only">Paddy Master</span>

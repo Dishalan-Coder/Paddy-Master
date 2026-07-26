@@ -28,10 +28,15 @@ export default function AddFarmPage() {
       <div>
         <p className="page-kicker">Field setup</p>
         <h1 className="page-title">Add farm</h1>
-        <p className="page-copy">Create a land record so crops, expenses, and recommendations stay connected.</p>
+        <p className="page-copy">
+          Create a land record so crops, expenses, and recommendations stay
+          connected.
+        </p>
       </div>
       <ErrorAlert message={error} onDismiss={() => setError('')} />
-      <div className="card"><FarmForm onSubmit={submit} loading={loading} /></div>
+      <div className="card">
+        <FarmForm onSubmit={submit} loading={loading} />
+      </div>
     </div>
   );
 }

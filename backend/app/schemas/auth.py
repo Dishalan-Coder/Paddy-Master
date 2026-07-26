@@ -8,7 +8,9 @@ from app.utils.validators import get_name_validation_error, get_phone_validation
 
 
 class LoginRequest(BaseModel):
-    login_id: str = Field(..., min_length=3, max_length=120, description="Phone number or email")
+    login_id: str = Field(
+        ..., min_length=3, max_length=120, description="Phone number or email"
+    )
     password: str = Field(..., min_length=6, max_length=128)
 
     @field_validator("login_id")

@@ -1,11 +1,11 @@
 export const PASSWORD_MIN_LENGTH = 6;
 export const PASSWORD_MAX_LENGTH = 128;
 
-export const validateEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+export const validateEmail = (email = '') =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 
-export const getNameValidationError = (name = '', label = 'Name') => (
-  /\d/.test(name.trim()) ? `${label} cannot contain numbers.` : ''
-);
+export const getNameValidationError = (name = '', label = 'Name') =>
+  /\d/.test(name.trim()) ? `${label} cannot contain numbers.` : '';
 
 export const validateName = (name = '') => !getNameValidationError(name);
 
@@ -20,9 +20,13 @@ export const getPhoneValidationError = (phone = '') => {
 
 export const validatePhone = (phone = '') => !getPhoneValidationError(phone);
 
-export const validateLoginId = (loginId = '') => validateEmail(loginId) || validatePhone(loginId);
+export const validateLoginId = (loginId = '') =>
+  validateEmail(loginId) || validatePhone(loginId);
 
-export const getPasswordValidationError = (password = '', requiredMessage = 'Password is required.') => {
+export const getPasswordValidationError = (
+  password = '',
+  requiredMessage = 'Password is required.',
+) => {
   if (!password) return requiredMessage;
   if (password.length < PASSWORD_MIN_LENGTH) {
     return `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`;
@@ -33,4 +37,5 @@ export const getPasswordValidationError = (password = '', requiredMessage = 'Pas
   return '';
 };
 
-export const validatePassword = (password = '') => !getPasswordValidationError(password);
+export const validatePassword = (password = '') =>
+  !getPasswordValidationError(password);

@@ -22,13 +22,20 @@ describe('PlaceOrderButton', () => {
   });
 
   it('validates and sends the product id with the order payload', async () => {
-    orderService.create.mockResolvedValueOnce({ _id: 'order-456', total_price: 1200 });
+    orderService.create.mockResolvedValueOnce({
+      _id: 'order-456',
+      total_price: 1200,
+    });
 
     render(<PlaceOrderButton product={product} />);
 
     fireEvent.click(screen.getByRole('button', { name: /place order/i }));
-    fireEvent.change(screen.getByLabelText('Quantity (kg)'), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText('Delivery address'), { target: { value: 'Main Road, Colombo' } });
+    fireEvent.change(screen.getByLabelText('Quantity (kg)'), {
+      target: { value: '10' },
+    });
+    fireEvent.change(screen.getByLabelText('Delivery address'), {
+      target: { value: 'Main Road, Colombo' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /confirm order/i }));
 
     await waitFor(() => {
@@ -47,8 +54,12 @@ describe('PlaceOrderButton', () => {
     render(<PlaceOrderButton product={product} />);
 
     fireEvent.click(screen.getByRole('button', { name: /place order/i }));
-    fireEvent.change(screen.getByLabelText('Quantity (kg)'), { target: { value: '300' } });
-    fireEvent.change(screen.getByLabelText('Delivery address'), { target: { value: 'Main Road, Colombo' } });
+    fireEvent.change(screen.getByLabelText('Quantity (kg)'), {
+      target: { value: '300' },
+    });
+    fireEvent.change(screen.getByLabelText('Delivery address'), {
+      target: { value: 'Main Road, Colombo' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /confirm order/i }));
 
     await waitFor(() => {

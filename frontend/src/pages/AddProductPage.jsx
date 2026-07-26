@@ -16,7 +16,9 @@ export default function AddProductPage() {
       await productService.create(formData);
       navigate('/marketplace');
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError, 'Could not create the listing.'));
+      setError(
+        getApiErrorMessage(requestError, 'Could not create the listing.'),
+      );
     } finally {
       setLoading(false);
     }
@@ -27,10 +29,18 @@ export default function AddProductPage() {
       <div>
         <p className="page-kicker">Marketplace supply</p>
         <h1 className="page-title">List your paddy</h1>
-        <p className="page-copy">Publish clear variety, location, quantity, price, and quality details so buyers can order with confidence.</p>
+        <p className="page-copy">
+          Publish clear variety, location, quantity, price, and quality details
+          so buyers can order with confidence.
+        </p>
       </div>
       <div className="card">
-        <ProductForm onSubmit={submit} loading={loading} serverError={error} onDismissServerError={() => setError('')} />
+        <ProductForm
+          onSubmit={submit}
+          loading={loading}
+          serverError={error}
+          onDismissServerError={() => setError('')}
+        />
       </div>
     </div>
   );

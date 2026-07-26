@@ -18,7 +18,9 @@ export default function PasswordField({
 
   return (
     <div>
-      <label htmlFor={id} className="label">{label}</label>
+      <label htmlFor={id} className="label">
+        {label}
+      </label>
       <div className="relative">
         <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-slate-400" />
         <input
@@ -45,7 +47,11 @@ export default function PasswordField({
           <Icon className="h-4 w-4" />
         </button>
       </div>
-      {error ? <p id={errorId} className="mt-1 text-xs font-semibold text-red-500">{error}</p> : null}
+      {error ? (
+        <p id={errorId} className="mt-1 text-xs font-semibold text-red-500">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

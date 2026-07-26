@@ -87,7 +87,9 @@ async def get_weather(district: str = "anuradhapura") -> Dict[str, Any]:
     key = normalize_district(district)
     if key not in DISTRICT_COORDS:
         key = "anuradhapura"
-    if not settings.WEATHER_API_KEY or settings.WEATHER_API_KEY.lower().startswith("your_"):
+    if not settings.WEATHER_API_KEY or settings.WEATHER_API_KEY.lower().startswith(
+        "your_"
+    ):
         return sample_weather(key)
 
     coords = DISTRICT_COORDS[key]
@@ -142,38 +144,46 @@ def generate_alerts(current: dict, forecast: dict) -> List[Dict[str, Any]]:
     for item in items[:16]:
         rain = item.get("rain", {}).get("3h", 0)
         if rain > 15:
-            alerts.append({
-                "type": "flood",
-                "severity": "high",
-                "message": f"Heavy rain expected ({rain}mm/3h). Check field drainage.",
-                "time": item.get("dt_txt", "soon"),
-            })
+            alerts.append(
+                {
+                    "type": "flood",
+                    "severity": "high",
+                    "message": f"Heavy rain expected ({rain}mm/3h). Check field drainage.",
+                    "time": item.get("dt_txt", "soon"),
+                }
+            )
             break
         if rain > 5:
-            alerts.append({
-                "type": "rain",
-                "severity": "medium",
-                "message": f"Rain expected ({rain}mm/3h). Delay pesticide application.",
-                "time": item.get("dt_txt", "soon"),
-            })
+            alerts.append(
+                {
+                    "type": "rain",
+                    "severity": "medium",
+                    "message": f"Rain expected ({rain}mm/3h). Delay pesticide application.",
+                    "time": item.get("dt_txt", "soon"),
+                }
+            )
             break
 
     total_rain = sum(item.get("rain", {}).get("3h", 0) for item in items)
     max_temp = max(item.get("main", {}).get("temp", 0) for item in items)
     if total_rain < 2 and max_temp > 35:
-        alerts.append({
-            "type": "drought",
-            "severity": "high",
-            "message": "Little rain and high temperatures are expected. Review irrigation.",
-            "time": "this week",
-        })
+        alerts.append(
+            {
+                "type": "drought",
+                "severity": "high",
+                "message": "Little rain and high temperatures are expected. Review irrigation.",
+                "time": "this week",
+            }
+        )
 
     humidity_values = [item.get("main", {}).get("humidity", 0) for item in items[:8]]
     if humidity_values and sum(humidity_values) / len(humidity_values) > 85:
-        alerts.append({
-            "type": "pest",
-            "severity": "medium",
-            "message": "High humidity may increase pest and fungal disease risk.",
-            "time": "this week",
-        })
+        alerts.append(
+            {
+                "type": "pest",
+                "severity": "medium",
+                "message": "High humidity may increase pest and fungal disease risk.",
+                "time": "this week",
+            }
+        )
     return alerts

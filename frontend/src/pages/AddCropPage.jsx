@@ -28,10 +28,15 @@ export default function AddCropPage() {
       <div>
         <p className="page-kicker">Crop tracking</p>
         <h1 className="page-title">Add crop</h1>
-        <p className="page-copy">Track planting, acreage, growth stage, and expected harvest timing for recommendations.</p>
+        <p className="page-copy">
+          Track planting, acreage, growth stage, and expected harvest timing for
+          recommendations.
+        </p>
       </div>
       <ErrorAlert message={error} onDismiss={() => setError('')} />
-      <div className="card"><CropForm onSubmit={submit} loading={loading} /></div>
+      <div className="card">
+        <CropForm onSubmit={submit} loading={loading} />
+      </div>
     </div>
   );
 }

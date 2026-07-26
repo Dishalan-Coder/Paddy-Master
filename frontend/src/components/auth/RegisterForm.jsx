@@ -36,17 +36,23 @@ export default function RegisterForm() {
 
   const change = (event) => {
     const { name, value, type, checked } = event.target;
-    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
+    setForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
     setErrors((current) => {
       let nextError = '';
-      if (name === 'phone' && /[^\d]/.test(value.trim())) nextError = 'Only numbers can be entered.';
-      if (name === 'full_name') nextError = getNameValidationError(value, 'Full name');
+      if (name === 'phone' && /[^\d]/.test(value.trim()))
+        nextError = 'Only numbers can be entered.';
+      if (name === 'full_name')
+        nextError = getNameValidationError(value, 'Full name');
 
       const next = {
         ...current,
         [name]: nextError,
       };
-      if (name === 'password' || name === 'confirm_password') next.confirm_password = '';
+      if (name === 'password' || name === 'confirm_password')
+        next.confirm_password = '';
       return next;
     });
     setError('');
@@ -124,14 +130,21 @@ export default function RegisterForm() {
     }
   };
 
-  const fieldError = (name) => (
-    errors[name] ? <p id={`${name}-error`} className="mt-1 text-xs font-semibold text-red-500">{errors[name]}</p> : null
-  );
+  const fieldError = (name) =>
+    errors[name] ? (
+      <p
+        id={`${name}-error`}
+        className="mt-1 text-xs font-semibold text-red-500"
+      >
+        {errors[name]}
+      </p>
+    ) : null;
 
-  const fieldClass = (name) => clsx(
-    'input-field',
-    errors[name] && 'border-red-300 focus:border-red-500 focus:ring-red-100',
-  );
+  const fieldClass = (name) =>
+    clsx(
+      'input-field',
+      errors[name] && 'border-red-300 focus:border-red-500 focus:ring-red-100',
+    );
 
   return (
     <div className="w-full max-w-lg animate-fadeIn">
@@ -139,8 +152,12 @@ export default function RegisterForm() {
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-emerald-700">
           <ShieldCheck className="h-4 w-4" /> Role-based registration
         </div>
-        <h1 className="mt-4 font-display text-3xl font-black tracking-tight text-slate-950">{t('create_account')}</h1>
-        <p className="mt-2 text-sm text-slate-500">Choose how you will use the paddy management and marketplace system.</p>
+        <h1 className="mt-4 font-display text-3xl font-black tracking-tight text-slate-950">
+          {t('create_account')}
+        </h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Choose how you will use the paddy management and marketplace system.
+        </p>
       </div>
       <div className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40 sm:p-8">
         <ErrorAlert message={error} onDismiss={() => setError('')} />
@@ -154,7 +171,9 @@ export default function RegisterForm() {
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label htmlFor="full_name" className="label">{t('full_name')}</label>
+              <label htmlFor="full_name" className="label">
+                {t('full_name')}
+              </label>
               <input
                 id="full_name"
                 name="full_name"
@@ -163,12 +182,16 @@ export default function RegisterForm() {
                 className={fieldClass('full_name')}
                 autoComplete="name"
                 aria-invalid={Boolean(errors.full_name)}
-                aria-describedby={errors.full_name ? 'full_name-error' : undefined}
+                aria-describedby={
+                  errors.full_name ? 'full_name-error' : undefined
+                }
               />
               {fieldError('full_name')}
             </div>
             <div>
-              <label htmlFor="phone" className="label">{t('phone')}</label>
+              <label htmlFor="phone" className="label">
+                {t('phone')}
+              </label>
               <input
                 id="phone"
                 name="phone"
@@ -186,7 +209,9 @@ export default function RegisterForm() {
               {fieldError('phone')}
             </div>
             <div>
-              <label htmlFor="email" className="label">{t('email')}</label>
+              <label htmlFor="email" className="label">
+                {t('email')}
+              </label>
               <input
                 id="email"
                 name="email"
@@ -201,7 +226,9 @@ export default function RegisterForm() {
               {fieldError('email')}
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="district" className="label">{t('district')}</label>
+              <label htmlFor="district" className="label">
+                {t('district')}
+              </label>
               <select
                 id="district"
                 name="district"
@@ -209,10 +236,14 @@ export default function RegisterForm() {
                 onChange={change}
                 className={fieldClass('district')}
                 aria-invalid={Boolean(errors.district)}
-                aria-describedby={errors.district ? 'district-error' : undefined}
+                aria-describedby={
+                  errors.district ? 'district-error' : undefined
+                }
               >
                 <option value="">Select district</option>
-                {DISTRICTS.map((district) => <option key={district}>{district}</option>)}
+                {DISTRICTS.map((district) => (
+                  <option key={district}>{district}</option>
+                ))}
               </select>
               {fieldError('district')}
             </div>
@@ -243,18 +274,26 @@ export default function RegisterForm() {
               onChange={change}
               className="mt-1 h-4 w-4"
               aria-invalid={Boolean(errors.agree_terms)}
-              aria-describedby={errors.agree_terms ? 'agree_terms-error' : undefined}
+              aria-describedby={
+                errors.agree_terms ? 'agree_terms-error' : undefined
+              }
             />
             <span className="text-sm leading-5 text-slate-600">
-              {t('agree_terms')} and understand that payment integrations must be configured for production.
+              {t('agree_terms')} and understand that payment integrations must
+              be configured for production.
             </span>
           </label>
           {fieldError('agree_terms')}
-          <Button type="submit" loading={loading} className="w-full">{t('register')}</Button>
+          <Button type="submit" loading={loading} className="w-full">
+            {t('register')}
+          </Button>
         </form>
       </div>
       <p className="mt-5 text-center text-sm text-slate-500">
-        {t('have_account')} <Link to="/login" className="font-black text-emerald-700">{t('login')}</Link>
+        {t('have_account')}{' '}
+        <Link to="/login" className="font-black text-emerald-700">
+          {t('login')}
+        </Link>
       </p>
     </div>
   );

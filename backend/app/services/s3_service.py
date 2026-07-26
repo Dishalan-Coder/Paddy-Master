@@ -31,7 +31,9 @@ def get_s3_client():
     )
 
 
-def upload_file(file_bytes: bytes, folder: str, content_type: str = "image/jpeg") -> Optional[str]:
+def upload_file(
+    file_bytes: bytes, folder: str, content_type: str = "image/jpeg"
+) -> Optional[str]:
     if not file_bytes:
         return None
 

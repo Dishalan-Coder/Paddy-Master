@@ -8,7 +8,12 @@ const year = new Date().getFullYear();
 export default function Footer({ variant = 'public', className = '' }) {
   if (variant === 'app') {
     return (
-      <footer className={clsx('border-t border-slate-200/80 pt-5 text-sm text-slate-500', className)}>
+      <footer
+        className={clsx(
+          'border-t border-slate-200/80 pt-5 text-sm text-slate-500',
+          className,
+        )}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link to="/" className="inline-flex items-center hover:opacity-90">
             <BrandLogo size="xs" />
@@ -26,7 +31,12 @@ export default function Footer({ variant = 'public', className = '' }) {
 
   if (variant === 'auth') {
     return (
-      <footer className={clsx('w-full max-w-md pt-8 text-center text-xs font-semibold text-slate-400', className)}>
+      <footer
+        className={clsx(
+          'w-full max-w-md pt-8 text-center text-xs font-semibold text-slate-400',
+          className,
+        )}
+      >
         <p>&copy; {year} Paddy Master. Smart farm and marketplace system.</p>
       </footer>
     );
@@ -40,15 +50,24 @@ export default function Footer({ variant = 'public', className = '' }) {
             <BrandLogo size="sm" />
           </Link>
           <p className="mt-4 max-w-xl leading-6">
-            Crop records, weather intelligence, marketplace orders, payments, and admin controls for a more transparent paddy workflow.
+            Crop records, weather intelligence, marketplace orders, payments,
+            and admin controls for a more transparent paddy workflow.
           </p>
         </div>
         <div className="flex flex-col gap-4 lg:items-end">
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold text-slate-600">
-            <a href="#features" className="hover:text-emerald-700">Features</a>
-            <a href="#roles" className="hover:text-emerald-700">For everyone</a>
-            <a href="#workflow" className="hover:text-emerald-700">How it works</a>
-            <Link to="/login" className="hover:text-emerald-700">Log in</Link>
+            <a href="#features" className="hover:text-emerald-700">
+              Features
+            </a>
+            <a href="#roles" className="hover:text-emerald-700">
+              For everyone
+            </a>
+            <a href="#workflow" className="hover:text-emerald-700">
+              How it works
+            </a>
+            <Link to="/login" className="hover:text-emerald-700">
+              Log in
+            </Link>
           </nav>
           <p className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400">
             <ShieldCheck className="h-4 w-4 text-emerald-700" />

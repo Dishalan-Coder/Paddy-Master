@@ -14,6 +14,7 @@ def require_role(*roles: UserRole):
                 detail=f"Access denied. Required role: {', '.join(r.value for r in roles)}",
             )
         return user
+
     return role_checker
 
 

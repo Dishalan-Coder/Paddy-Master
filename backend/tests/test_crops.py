@@ -11,13 +11,15 @@ from app.main import app
 @pytest.mark.asyncio
 async def test_create_crop_without_farm(fake_database):
     user_id = ObjectId()
-    fake_database.users.documents.append({
-        "_id": user_id,
-        "full_name": "Test Farmer",
-        "email": "farmer@example.com",
-        "phone": "0770000001",
-        "role": "farmer",
-    })
+    fake_database.users.documents.append(
+        {
+            "_id": user_id,
+            "full_name": "Test Farmer",
+            "email": "farmer@example.com",
+            "phone": "0770000001",
+            "role": "farmer",
+        }
+    )
     token = create_access_token({"sub": str(user_id), "role": "farmer"})
 
     transport = ASGITransport(app=app)

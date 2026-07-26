@@ -30,12 +30,16 @@ async def get_current_user(
 
     user_id = object_id_or_none(payload.get("sub"))
     if user_id is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject"
+        )
 
     db = get_database_or_raise()
     user = await db.users.find_one({"_id": user_id})
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+        )
     return user
 
 
@@ -43,8 +47,12 @@ async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> str:
     if credentials is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+        )
     payload = verify_token(credentials.credentials)
     if not payload or not payload.get("sub"):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
     return str(payload["sub"])
