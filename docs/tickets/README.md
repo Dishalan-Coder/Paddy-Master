@@ -44,3 +44,4 @@ This folder records the PM ticket branches used for the GitHub pull-request work
 - [PM](PM-040-ui-product-details-page.md) - UI: Product Details Page (Development)
 - [PM](PM-041-ui-search-filter-products.md) - UI: Search & Filter Products (Development)
 - [PM](PM-042-api-get-all-products.md) - API: Get All Products (Development)
+- [PM](PM-043-api-get-single-product.md) - API: Get Single Product (Development)
