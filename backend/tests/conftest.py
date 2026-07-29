@@ -125,6 +125,7 @@ class FakeDatabase:
         self.market_prices = FakeCollection()
         self.notifications = FakeCollection()
         self.reviews = FakeCollection()
+        self.stripe_events = FakeCollection()
 
 
 @pytest.fixture(autouse=True)

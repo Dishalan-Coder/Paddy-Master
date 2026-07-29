@@ -25,6 +25,15 @@ function normalizeUser(data) {
     rating: Number(data.rating || 0),
     total_reviews: Number(data.total_reviews || 0),
     wallet_balance: Number(data.wallet_balance || 0),
+    subscription_plan: data.subscription_plan || null,
+    subscription_status: data.subscription_status || 'inactive',
+    subscription_current_period_end:
+      data.subscription_current_period_end || null,
+    subscription_cancel_at_period_end: Boolean(
+      data.subscription_cancel_at_period_end,
+    ),
+    stripe_customer_id: data.stripe_customer_id || null,
+    stripe_subscription_id: data.stripe_subscription_id || null,
   };
 }
 

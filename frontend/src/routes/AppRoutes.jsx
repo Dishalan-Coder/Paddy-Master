@@ -24,6 +24,7 @@ const MarketplacePage = lazy(() => import('../pages/MarketplacePage'));
 const ProductDetailsPage = lazy(() => import('../pages/ProductDetailsPage'));
 const AddProductPage = lazy(() => import('../pages/AddProductPage'));
 const OrdersPage = lazy(() => import('../pages/OrdersPage'));
+const BillingPage = lazy(() => import('../pages/BillingPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
@@ -87,6 +88,7 @@ export default function AppRoutes() {
           />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/billing" element={<BillingPage />} />
         </Route>
 
         <Route

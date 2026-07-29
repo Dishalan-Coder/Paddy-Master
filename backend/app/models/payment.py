@@ -1,7 +1,4 @@
-"""Basic payment workflow models.
-
-The included card flow is a local demo workflow, not a real payment gateway.
-"""
+"""Payment and subscription workflow models."""
 
 from enum import Enum
 from typing import Optional
@@ -23,7 +20,43 @@ class PaymentStatus(str, Enum):
     REFUNDED = "refunded"
 
 
+class SubscriptionPlan(str, Enum):
+    FARMER_PRO = "farmer_pro"
+    BUYER_PRO = "buyer_pro"
+
+
+class SubscriptionStatus(str, Enum):
+    INACTIVE = "inactive"
+    INCOMPLETE = "incomplete"
+    INCOMPLETE_EXPIRED = "incomplete_expired"
+    TRIALING = "trialing"
+    ACTIVE = "active"
+    PAST_DUE = "past_due"
+    CANCELED = "canceled"
+    PAUSED = "paused"
+    UNPAID = "unpaid"
+
+
 class PaymentRequest(BaseModel):
     method: PaymentMethod
     reference: Optional[str] = Field(default=None, max_length=120)
     demo_token: Optional[str] = Field(default=None, max_length=120)
+
+
+class SubscriptionCheckoutRequest(BaseModel):
+    plan: Optional[SubscriptionPlan] = None
+
+
+class StripeRedirectResponse(BaseModel):
+    url: str
+    session_id: Optional[str] = None
+
+
+class SubscriptionStatusResponse(BaseModel):
+    plan: Optional[SubscriptionPlan] = None
+    status: SubscriptionStatus = SubscriptionStatus.INACTIVE
+    active: bool = False
+    current_period_end: Optional[str] = None
+    cancel_at_period_end: bool = False
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None

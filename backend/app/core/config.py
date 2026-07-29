@@ -30,6 +30,18 @@ class Settings(BaseSettings):
     # Comma-separated origins
     CORS_ORIGINS: str
 
+    # Public frontend URL used for external payment redirects
+    PUBLIC_SITE_URL: str
+
+    # Stripe subscriptions
+    STRIPE_SECRET_KEY: str
+    STRIPE_WEBHOOK_SECRET: str
+    STRIPE_FARMER_PRICE_ID: str
+    STRIPE_BUYER_PRICE_ID: str
+    STRIPE_SUCCESS_URL: str
+    STRIPE_CANCEL_URL: str
+    STRIPE_BILLING_RETURN_URL: str
+
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",

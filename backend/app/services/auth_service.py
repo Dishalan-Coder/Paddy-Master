@@ -35,6 +35,12 @@ async def register_user(data: RegisterRequest) -> dict:
         "rating": 0.0,
         "total_reviews": 0,
         "wallet_balance": 0.0,
+        "stripe_customer_id": None,
+        "stripe_subscription_id": None,
+        "subscription_plan": None,
+        "subscription_status": "inactive",
+        "subscription_current_period_end": None,
+        "subscription_cancel_at_period_end": False,
         "created_at": now,
         "updated_at": now,
     }

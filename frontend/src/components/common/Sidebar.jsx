@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Bell,
   CloudSun,
+  CreditCard,
   DollarSign,
   Landmark,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const farmerLinks = [
   { to: '/recommendations', icon: Sparkles, label: 'recommendations' },
   { to: '/marketplace', icon: Store, label: 'marketplace' },
   { to: '/orders', icon: ShoppingCart, label: 'orders' },
+  { to: '/billing', icon: CreditCard, label: 'billing' },
   { to: '/prices-weather', icon: CloudSun, label: 'prices_weather' },
   { to: '/notifications', icon: Bell, label: 'notifications' },
   { to: '/profile', icon: UserRound, label: 'profile' },
@@ -35,6 +37,7 @@ const buyerLinks = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'dashboard' },
   { to: '/marketplace', icon: Store, label: 'marketplace' },
   { to: '/orders', icon: ShoppingCart, label: 'orders' },
+  { to: '/billing', icon: CreditCard, label: 'billing' },
   { to: '/prices-weather', icon: CloudSun, label: 'prices_weather' },
   { to: '/notifications', icon: Bell, label: 'notifications' },
   { to: '/profile', icon: UserRound, label: 'profile' },
