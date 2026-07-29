@@ -110,8 +110,7 @@ docker compose down -v
 Use the production compose file for a deployable single-host setup. It keeps MongoDB off the public host ports, serves the React build through Nginx, proxies `/api` and `/uploads` to the backend service, and requires production secrets before startup.
 
 ```bash
-cp .env.production.example .env.production
-# Edit .env.production with real domain, secrets, CORS origins, and storage settings.
+# Create .env.production with real domain, Mongo credentials, secrets, CORS origins, and storage settings.
 docker compose --env-file .env.production -f docker-compose.prod.yml up --build -d
 ```
 
@@ -131,11 +130,11 @@ Place HTTPS, DNS, certificate renewal, and optional CDN/WAF controls at the load
 Start MongoDB locally, then run:
 
 ```bash
+cp .env.example .env
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -152,7 +151,6 @@ In a second terminal:
 ```bash
 cd frontend
 npm ci
-cp .env.example .env
 npm run dev
 ```
 
@@ -160,7 +158,7 @@ Vite proxies `/api` and `/uploads` to the backend in development.
 
 ## Amazon S3 configuration
 
-For local backend development, set these values in `backend/.env`. For Docker Compose, set them in the root `.env`:
+For local backend development and Docker Compose, set these values in the root `.env`:
 
 ```env
 AWS_ACCESS_KEY_ID=your-access-key
@@ -175,7 +173,7 @@ When S3 settings are blank, images are saved under `backend/uploads` and exposed
 
 ## Weather configuration
 
-Set `WEATHER_API_KEY` in `backend/.env` to use OpenWeatherMap. Without a key, the application returns clearly marked demonstration weather and agricultural alerts so the UI remains usable locally.
+Set `WEATHER_API_KEY` in the root `.env` to use OpenWeatherMap. Without a key, the application returns clearly marked demonstration weather and agricultural alerts so the UI remains usable locally.
 
 ## Payment scope
 
@@ -255,7 +253,6 @@ paddy-master/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   └── PRODUCTION_CHECKLIST.md
-├── .env.production.example
 ├── docker-compose.prod.yml
 └── docker-compose.yml
 ```
@@ -268,7 +265,7 @@ npm test
 npm run build
 
 # Deployment config
-docker compose --env-file .env.production.example -f docker-compose.prod.yml config
+docker compose --env-file .env.production -f docker-compose.prod.yml config
 ```
 
 Validated in this pass:

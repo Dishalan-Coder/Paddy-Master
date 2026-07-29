@@ -65,6 +65,6 @@ def get_database_or_raise() -> AsyncIOMotorDatabase:
     database = get_database()
     if database is None:
         raise DatabaseUnavailableError(
-            "Database not available. Start MongoDB or check MONGO_URI in backend/.env."
+            "Database not available. Start MongoDB or check MONGO_URI in .env."
         )
     return database
