@@ -51,6 +51,12 @@ def present_user(user: dict) -> dict:
     stored_key = user.get("profile_image_key") or user.get("profile_image_url")
     safe_user["profile_image_url"] = s3_service.resolve_file_url(stored_key)
     safe_user.pop("profile_image_key", None)
+    safe_user.setdefault("subscription_plan", None)
+    safe_user.setdefault("subscription_status", "inactive")
+    safe_user.setdefault("subscription_current_period_end", None)
+    safe_user.setdefault("subscription_cancel_at_period_end", False)
+    safe_user.setdefault("stripe_customer_id", None)
+    safe_user.setdefault("stripe_subscription_id", None)
     return safe_user
 
 

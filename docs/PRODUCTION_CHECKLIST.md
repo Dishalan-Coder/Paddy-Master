@@ -35,9 +35,10 @@
 
 ## Payments
 
-- Replace the demonstration flow with a regulated payment provider.
-- Verify signed callbacks/webhooks server-side.
-- Add idempotency, reconciliation, refund, dispute, and audit workflows.
+- Configure Stripe live-mode secret key, webhook secret, and role-specific recurring price IDs.
+- Verify signed Stripe webhooks server-side.
+- Confirm Checkout success/cancel URLs and Billing Portal return URLs use HTTPS production origins.
+- Add reconciliation, refund, dispute, and audit workflows.
 - Never store raw card details.
 
 ## Operations

@@ -6,6 +6,7 @@ from httpx import ASGITransport, AsyncClient
 
 from app.core.jwt import create_access_token
 from app.main import app
+from app.services import payment_service
 
 
 def farmer_token(fake_database):
@@ -92,12 +93,50 @@ async def test_create_farm_rejects_name_with_numbers(fake_database):
 
 
 @pytest.mark.asyncio
+async def test_subscription_status_defaults_to_inactive(fake_database):
+    _user_id, token = farmer_token(fake_database)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get(
+            "/api/v1/payments/subscription",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "inactive"
+    assert response.json()["active"] is False
+
+
+@pytest.mark.asyncio
+async def test_subscription_checkout_requires_stripe_configuration(
+    fake_database, monkeypatch
+):
+    _user_id, token = farmer_token(fake_database)
+    monkeypatch.setattr(payment_service.settings, "STRIPE_SECRET_KEY", "")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/payments/subscription/checkout",
+            json={"plan": "farmer_pro"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 503
+    assert "Stripe secret key is not configured" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "method,path",
     [
         ("GET", "/api/v1/notifications/"),
         ("GET", "/api/v1/recommendations/"),
         ("GET", "/api/v1/reviews/products/507f1f77bcf86cd799439011"),
+        ("GET", "/api/v1/payments/subscription"),
+        ("POST", "/api/v1/payments/subscription/checkout"),
+        ("POST", "/api/v1/payments/subscription/portal"),
         ("POST", "/api/v1/payments/orders/507f1f77bcf86cd799439011"),
         (
             "PATCH",

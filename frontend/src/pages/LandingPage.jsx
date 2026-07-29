@@ -543,8 +543,8 @@ export default function LandingPage() {
               <p className="section-copy max-w-3xl lg:justify-self-end">
                 The repository now includes a deploy-focused path for the web
                 surface, API proxying, environment separation, and operational
-                hardening. Live card charging still needs a real payment
-                provider before accepting money.
+                hardening. Stripe subscriptions are available for account
+                billing, while order card payments remain a local demo flow.
               </p>
             </div>
             <div className="mt-10 grid gap-4 md:grid-cols-2">

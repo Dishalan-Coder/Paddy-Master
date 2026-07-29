@@ -22,6 +22,10 @@ class UserBase(BaseModel):
     is_verified: bool = False
     rating: float = 0.0
     total_reviews: int = 0
+    subscription_plan: Optional[str] = None
+    subscription_status: str = "inactive"
+    subscription_current_period_end: Optional[datetime] = None
+    subscription_cancel_at_period_end: bool = False
 
 
 class UserCreate(UserBase):
@@ -32,6 +36,8 @@ class UserInDB(UserBase):
     id: str = Field(alias="_id")
     hashed_password: str
     wallet_balance: float = 0.0
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -50,6 +56,12 @@ class UserOut(BaseModel):
     rating: float
     total_reviews: int
     wallet_balance: float
+    subscription_plan: Optional[str] = None
+    subscription_status: str = "inactive"
+    subscription_current_period_end: Optional[datetime] = None
+    subscription_cancel_at_period_end: bool = False
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(populate_by_name=True)

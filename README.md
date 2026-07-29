@@ -121,7 +121,7 @@ Production defaults:
 - Uploads: available through the frontend origin at `/uploads`
 - Frontend health check: `/healthz`
 
-Place HTTPS, DNS, certificate renewal, and optional CDN/WAF controls at the load balancer or reverse proxy in front of the frontend container. For card payments, replace the included local workflow with a regulated provider integration before accepting real money.
+Place HTTPS, DNS, certificate renewal, and optional CDN/WAF controls at the load balancer or reverse proxy in front of the frontend container. Configure Stripe live-mode keys, price IDs, and webhook signing secrets before accepting real subscription payments.
 
 ## Local development
 
@@ -175,15 +175,15 @@ When S3 settings are blank, images are saved under `backend/uploads` and exposed
 
 Set `WEATHER_API_KEY` in the root `.env` to use OpenWeatherMap. Without a key, the application returns clearly marked demonstration weather and agricultural alerts so the UI remains usable locally.
 
-## Payment scope
+## Payment and subscription scope
 
-The included payment module is a **basic MVP workflow**, not a production payment gateway:
+Order payments still support cash on delivery, bank transfer, and the local demo-card workflow. Account subscriptions use Stripe Checkout and Stripe Billing Portal:
 
-- Cash on delivery records a pending payment.
-- Bank transfer records a reference and processing state; an administrator can confirm receipt.
-- Demo card payment accepts a local demonstration token and marks the order paid.
+- Farmers subscribe to the Farmer Pro price configured by `STRIPE_FARMER_PRICE_ID`.
+- Buyers subscribe to the Buyer Pro price configured by `STRIPE_BUYER_PRICE_ID`.
+- Stripe webhooks update each user's subscription status after checkout, renewals, cancellations, and plan changes.
 
-Before accepting real money, integrate a supported payment provider, validate callbacks/webhooks, use idempotency keys, and complete the provider's security/compliance requirements.
+Register the backend webhook URL in Stripe as `/api/v1/payments/subscription/webhook` and listen for Checkout Session and customer subscription events.
 
 ## Environment variables
 
@@ -197,17 +197,25 @@ Before accepting real money, integrate a supported payment provider, validate ca
 | `JWT_ALGORITHM` | JWT algorithm, normally `HS256` |
 | `JWT_EXPIRE_MINUTES` | Access-token lifetime |
 | `CORS_ORIGINS` | Comma-separated allowed frontend origins |
+| `PUBLIC_SITE_URL` | Frontend origin used for Stripe redirects |
 | `WEATHER_API_KEY` | Optional OpenWeatherMap API key |
 | `AWS_ACCESS_KEY_ID` | Optional S3 access key |
 | `AWS_SECRET_ACCESS_KEY` | Optional S3 secret |
 | `AWS_REGION` | S3 region |
 | `S3_BUCKET_NAME` | S3 bucket name |
+| `STRIPE_SECRET_KEY` | Stripe secret API key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `STRIPE_FARMER_PRICE_ID` | Stripe recurring price ID for Farmer Pro |
+| `STRIPE_BUYER_PRICE_ID` | Stripe recurring price ID for Buyer Pro |
+| `STRIPE_SUCCESS_URL` | Optional Checkout success URL override |
+| `STRIPE_CANCEL_URL` | Optional Checkout cancel URL override |
+| `STRIPE_BILLING_RETURN_URL` | Optional Billing Portal return URL override |
 
 ### Production compose
 
 | Variable | Description |
 |---|---|
-| `PUBLIC_SITE_URL` | Public HTTPS website origin used by operators and docs |
+| `PUBLIC_SITE_URL` | Public HTTPS website origin used by operators, docs, and Stripe redirects |
 | `FRONTEND_PORT` | Host port for the Nginx frontend container |
 | `MONGO_ROOT_USERNAME` | MongoDB root username for production compose |
 | `MONGO_ROOT_PASSWORD` | MongoDB root password for production compose |
@@ -274,8 +282,8 @@ Validated in this pass:
 - Frontend production build: passed
 - Production Docker Compose config: rendered successfully
 
-Run the backend test suite, dependency audit, container scan, and live MongoDB/S3/payment-provider checks in CI or the target deployment environment before release.
+Run the backend test suite, dependency audit, container scan, and live MongoDB/S3/Stripe checks in CI or the target deployment environment before release.
 
 ## Production requirements
 
-Read [`docs/PRODUCTION_CHECKLIST.md`](docs/PRODUCTION_CHECKLIST.md) before deployment. At minimum, replace the JWT secret, configure restricted CORS, use HTTPS, secure MongoDB, configure S3 IAM, integrate a real payment gateway, add email/SMS delivery, enable monitoring, and establish backups.
+Read [`docs/PRODUCTION_CHECKLIST.md`](docs/PRODUCTION_CHECKLIST.md) before deployment. At minimum, replace the JWT secret, configure restricted CORS, use HTTPS, secure MongoDB, configure S3 IAM, verify Stripe live-mode billing, add email/SMS delivery, enable monitoring, and establish backups.
