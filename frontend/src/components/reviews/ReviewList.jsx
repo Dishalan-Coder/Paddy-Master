@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { BadgeCheck, Star } from 'lucide-react';
 import { formatDate } from '../../utils/formatters';
 
@@ -15,15 +16,16 @@ function Stars({ value }) {
 }
 
 export default function ReviewList({ data }) {
+  const { t } = useTranslation();
   const reviews = data?.reviews || [];
   return (
     <section className="rounded-[1.5rem] border border-slate-200 bg-white p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-            Verified purchases
+            {t('review.verified_purchases')}
           </p>
-          <h2 className="mt-1 text-xl font-black">Buyer reviews</h2>
+          <h2 className="mt-1 text-xl font-black">{t('review.buyer_reviews')}</h2>
         </div>
         <div className="flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3">
           <span className="text-2xl font-black text-amber-800">
@@ -32,14 +34,14 @@ export default function ReviewList({ data }) {
           <div>
             <Stars value={data?.average_rating || 0} />
             <p className="mt-0.5 text-xs text-amber-700">
-              {data?.total || 0} reviews
+              {t('review.count', { count: data?.total || 0 })}
             </p>
           </div>
         </div>
       </div>
       {!reviews.length && (
         <p className="mt-8 rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-400">
-          No reviews have been submitted for this listing.
+          {t('review.empty')}
         </p>
       )}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ExpenseForm from '../components/expenses/ExpenseForm';
 import ExpenseList from '../components/expenses/ExpenseList';
 import ProfitLossDisplay from '../components/expenses/ProfitLossDisplay';
@@ -9,6 +10,7 @@ import expenseService from '../services/expenseService';
 import { getApiErrorMessage } from '../utils/forms';
 
 export default function ExpensesPage() {
+  const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [actionError, setActionError] = useState('');
   const {
@@ -32,7 +34,7 @@ export default function ExpensesPage() {
     } catch (requestError) {
       const message = getApiErrorMessage(
         requestError,
-        'Could not add the expense.',
+        t('forms.add_expense_failed'),
       );
       setActionError(message);
       throw new Error(message);
@@ -44,11 +46,10 @@ export default function ExpensesPage() {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div>
-        <p className="page-kicker">Cost control</p>
-        <h1 className="page-title">Expenses</h1>
+        <p className="page-kicker">{t('pages.expenses.kicker')}</p>
+        <h1 className="page-title">{t('pages.expenses.title')}</h1>
         <p className="page-copy">
-          Record crop and general farm costs, then compare spending against
-          delivered-order earnings.
+          {t('pages.expenses.copy')}
         </p>
       </div>
       <ErrorAlert
@@ -60,19 +61,18 @@ export default function ExpensesPage() {
           <ProfitLossDisplay data={profitLoss} />
           <div className="card">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="font-black">All expenses</h2>
+              <h2 className="font-black">{t('pages.expenses.all_expenses')}</h2>
               <span className="text-xs font-bold text-slate-400">
-                {expenses?.length || 0} records
+                {expenses?.length || 0} {t('common.records')}
               </span>
             </div>
             <ExpenseList expenses={expenses} loading={expensesLoading} />
           </div>
         </div>
         <aside className="card h-fit">
-          <h2 className="font-black">Add expense</h2>
+          <h2 className="font-black">{t('pages.expenses.add_expense')}</h2>
           <p className="mt-1 text-sm leading-6 text-slate-500">
-            Use crop-specific expenses when you want recommendations and profit
-            views to stay precise.
+            {t('pages.expenses.form_copy')}
           </p>
           <div className="mt-5">
             <ExpenseForm

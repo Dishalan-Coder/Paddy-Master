@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
@@ -12,7 +13,7 @@ import {
   toDateInputValue,
   toPositiveNumber,
 } from '../../utils/forms';
-import { formatGrowthStage } from '../../utils/formatters';
+import { formatGrowthStage, formatVariety } from '../../utils/formatters';
 
 const INITIAL_FORM = {
   farm_id: '',
@@ -35,6 +36,7 @@ const getFormValues = (crop = {}) => ({
 });
 
 export default function CropForm({ initialData, onSubmit, loading }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [farms, setFarms] = useState([]);
   const [farmsLoading, setFarmsLoading] = useState(true);
@@ -55,7 +57,12 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       })
       .catch(() => {
         if (mounted)
-          setError('Could not load farms. Create a farm before adding crops.');
+          setError(
+            t('forms.load_farms_failed', {
+              defaultValue:
+                'Could not load farms. Create a farm before adding crops.',
+            }),
+          );
       })
       .finally(() => {
         if (mounted) setFarmsLoading(false);
@@ -77,19 +84,32 @@ export default function CropForm({ initialData, onSubmit, loading }) {
     const area = toPositiveNumber(form.area_acres);
     const notes = form.notes.trim();
 
-    if (!form.farm_id) next.farm_id = 'Select the farm for this crop.';
-    if (!form.variety) next.variety = 'Paddy variety is required.';
-    if (!form.planting_date) next.planting_date = 'Planting date is required.';
+    if (!form.farm_id)
+      next.farm_id = t('validation.required', { field: t('farm') });
+    if (!form.variety)
+      next.variety = t('validation.required', { field: t('variety') });
+    if (!form.planting_date)
+      next.planting_date = t('validation.required', {
+        field: t('planting_date'),
+      });
     if (!form.expected_harvest_date)
-      next.expected_harvest_date = 'Expected harvest date is required.';
-    if (!form.area_acres) next.area_acres = 'Area is required.';
-    else if (!area) next.area_acres = 'Area must be greater than zero.';
+      next.expected_harvest_date = t('validation.required', {
+        field: t('expected_harvest_date'),
+      });
+    if (!form.area_acres)
+      next.area_acres = t('validation.required', { field: t('common.area') });
+    else if (!area)
+      next.area_acres = t('validation.positive', {
+        field: t('common.area'),
+      });
     if (isAfterDate(form.planting_date, form.expected_harvest_date)) {
-      next.expected_harvest_date =
-        'Harvest date must be after the planting date.';
+      next.expected_harvest_date = t('validation.harvest_after_planting');
     }
     if (notes.length > 500)
-      next.notes = 'Notes must be 500 characters or less.';
+      next.notes = t('validation.max_chars', {
+        field: t('notes'),
+        count: 500,
+      });
 
     return next;
   };
@@ -131,15 +151,15 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       <ErrorAlert message={error} onDismiss={() => setError('')} />
       {!farms.length && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
-          Add a farm before creating crop records.{' '}
+          {t('forms.add_farm_before_crop')}{' '}
           <Link to="/farms/new" className="font-black underline">
-            Create farm
+            {t('forms.create_farm')}
           </Link>
         </div>
       )}
       <div>
         <label htmlFor="crop_farm" className="label">
-          Farm
+          {t('farm')}
         </label>
         <select
           id="crop_farm"
@@ -150,7 +170,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
           aria-invalid={Boolean(errors.farm_id)}
           aria-describedby={errors.farm_id ? 'farm_id-error' : undefined}
         >
-          <option value="">Select farm</option>
+          <option value="">{t('forms.select_farm')}</option>
           {farms.map((farm) => (
             <option key={farm._id} value={farm._id}>
               {farm.name}
@@ -162,7 +182,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="crop_variety" className="label">
-            Variety
+            {t('variety')}
           </label>
           <select
             id="crop_variety"
@@ -173,16 +193,18 @@ export default function CropForm({ initialData, onSubmit, loading }) {
             aria-invalid={Boolean(errors.variety)}
             aria-describedby={errors.variety ? 'variety-error' : undefined}
           >
-            <option value="">Select variety</option>
+            <option value="">{t('forms.select_variety')}</option>
             {PADDY_VARIETIES.map((variety) => (
-              <option key={variety}>{variety}</option>
+              <option key={variety} value={variety}>
+                {formatVariety(variety)}
+              </option>
             ))}
           </select>
           {fieldError('variety')}
         </div>
         <div>
           <label htmlFor="crop_area" className="label">
-            Area (acres)
+            {t('area_acres')}
           </label>
           <input
             id="crop_area"
@@ -205,7 +227,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="crop_planting_date" className="label">
-            Planting date
+            {t('planting_date')}
           </label>
           <input
             id="crop_planting_date"
@@ -223,7 +245,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
         </div>
         <div>
           <label htmlFor="crop_harvest_date" className="label">
-            Expected harvest date
+            {t('expected_harvest_date')}
           </label>
           <input
             id="crop_harvest_date"
@@ -244,7 +266,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       </div>
       <div>
         <label htmlFor="crop_growth_stage" className="label">
-          Growth stage
+          {t('growth_stage')}
         </label>
         <select
           id="crop_growth_stage"
@@ -262,7 +284,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
       </div>
       <div>
         <label htmlFor="crop_notes" className="label">
-          Notes
+          {t('notes')}
         </label>
         <textarea
           id="crop_notes"
@@ -272,7 +294,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
           rows={3}
           maxLength={500}
           className={fieldClass(errors, 'notes')}
-          placeholder="Pest pressure, fertilizer plan, irrigation notes..."
+          placeholder={t('forms.crop_notes_placeholder')}
           aria-invalid={Boolean(errors.notes)}
           aria-describedby={
             errors.notes ? 'notes-error crop_notes_count' : 'crop_notes_count'
@@ -289,7 +311,7 @@ export default function CropForm({ initialData, onSubmit, loading }) {
         </div>
       </div>
       <Button type="submit" loading={loading} disabled={!farms.length}>
-        Save crop
+        {t('forms.save_crop')}
       </Button>
     </form>
   );

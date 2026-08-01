@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # Weather (optional; safe sample data is returned when this is empty)
     WEATHER_API_KEY: str
 
+    # OpenAI (optional; rule-based recommendations are used when this is empty)
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-5.6-luna"
+
     # Comma-separated origins
     CORS_ORIGINS: str
 
@@ -62,6 +66,12 @@ class Settings(BaseSettings):
             and self.AWS_SECRET_ACCESS_KEY
             and self.S3_BUCKET_NAME
             and not self.AWS_ACCESS_KEY_ID.lower().startswith("your_")
+        )
+
+    @property
+    def openai_enabled(self) -> bool:
+        return bool(
+            self.OPENAI_API_KEY and not self.OPENAI_API_KEY.lower().startswith("your_")
         )
 
 

@@ -30,6 +30,7 @@ export const PADDY_VARIETIES = [
   'Suwandel',
   'Pachchaiperumal',
 ];
+export const MARKET_PRICE_UNITS = [72, 75];
 export const DISTRICTS = [
   'Anuradhapura',
   'Polonnaruwa',

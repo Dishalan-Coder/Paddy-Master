@@ -6,6 +6,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+SUPPORTED_PRICE_UNITS_KG = {72, 75}
+
 
 class ProductStatus(str, Enum):
     ACTIVE = "active"
@@ -18,6 +20,7 @@ class ProductCreate(BaseModel):
     variety: str = Field(..., min_length=1, max_length=50)
     quantity_kg: float = Field(..., gt=0)
     price_per_kg: float = Field(..., gt=0)
+    price_unit_kg: int = Field(default=72)
     region: str = Field(..., min_length=1, max_length=100)
     district: str = Field(..., min_length=1, max_length=100)
     harvest_date: Optional[str] = None
@@ -37,11 +40,19 @@ class ProductCreate(BaseModel):
         stripped = value.strip()
         return stripped or None
 
+    @field_validator("price_unit_kg")
+    @classmethod
+    def validate_price_unit(cls, value: int) -> int:
+        if value not in SUPPORTED_PRICE_UNITS_KG:
+            raise ValueError("Select a valid market price unit")
+        return value
+
 
 class ProductUpdate(BaseModel):
     variety: Optional[str] = Field(default=None, min_length=1, max_length=50)
     quantity_kg: Optional[float] = Field(default=None, gt=0)
     price_per_kg: Optional[float] = Field(default=None, gt=0)
+    price_unit_kg: Optional[int] = None
     region: Optional[str] = Field(default=None, min_length=1, max_length=100)
     district: Optional[str] = Field(default=None, min_length=1, max_length=100)
     harvest_date: Optional[str] = None
@@ -59,6 +70,13 @@ class ProductUpdate(BaseModel):
             return value
         stripped = value.strip()
         return stripped or None
+
+    @field_validator("price_unit_kg")
+    @classmethod
+    def validate_update_price_unit(cls, value: Optional[int]) -> Optional[int]:
+        if value is not None and value not in SUPPORTED_PRICE_UNITS_KG:
+            raise ValueError("Select a valid market price unit")
+        return value
 
 
 class ProductInDB(ProductCreate):

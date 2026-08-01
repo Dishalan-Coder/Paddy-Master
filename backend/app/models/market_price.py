@@ -8,8 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field
 class MarketPriceCreate(BaseModel):
     date: date
     prices: Dict[str, float] = Field(
-        ..., description="e.g. {'nadu': 112, 'samba': 118, 'k_samba': 121}"
+        ..., description="e.g. {'nadu': 8064, 'samba': 8496, 'k_samba': 8712}"
     )
+    price_unit_kg: int = Field(default=72, description="Supported units: 72 or 75 kg")
     region: str = "national"
 
 
@@ -24,6 +25,7 @@ class MarketPriceOut(BaseModel):
     id: str
     date: date
     prices: Dict[str, float]
+    price_unit_kg: int = 72
     region: str
     created_at: datetime
 
@@ -33,3 +35,4 @@ class MarketPriceOut(BaseModel):
 class RegionalPrice(BaseModel):
     region: str
     prices: Dict[str, float]
+    price_unit_kg: int = 72

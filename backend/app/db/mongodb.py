@@ -27,10 +27,14 @@ async def connect_db() -> None:
         await db.users.create_index("email", unique=True)
         await db.users.create_index("phone", unique=True)
         await db.products.create_index("farmer_id")
+        await db.products.create_index("unit_price_per_kg")
         await db.products.create_index([("variety", 1), ("region", 1)])
         await db.orders.create_index("buyer_id")
         await db.orders.create_index("farmer_id")
         await db.messages.create_index("conversation_id")
+        await db.market_prices.create_index(
+            [("region", 1), ("price_unit_kg", 1), ("date", -1)]
+        )
         await db.notifications.create_index([("user_id", 1), ("created_at", -1)])
         await db.notifications.create_index(
             [("user_id", 1), ("metadata.reminder_key", 1)],

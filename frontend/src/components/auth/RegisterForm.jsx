@@ -8,12 +8,14 @@ import ErrorAlert from '../common/ErrorAlert';
 import RoleSelector from './RoleSelector';
 import { useAuth } from '../../context/AuthContext';
 import { DISTRICTS } from '../../utils/constants';
+import { formatDistrict } from '../../utils/formatters';
 import {
   getNameValidationError,
   getPasswordValidationError,
   getPhoneValidationError,
   validateEmail,
 } from '../../utils/validators';
+import { getApiErrorMessage } from '../../utils/forms';
 import PasswordField from './PasswordField';
 
 export default function RegisterForm() {
@@ -43,9 +45,9 @@ export default function RegisterForm() {
     setErrors((current) => {
       let nextError = '';
       if (name === 'phone' && /[^\d]/.test(value.trim()))
-        nextError = 'Only numbers can be entered.';
+        nextError = t('validation.only_numbers');
       if (name === 'full_name')
-        nextError = getNameValidationError(value, 'Full name');
+        nextError = getNameValidationError(value, t('full_name'));
 
       const next = {
         ...current,
@@ -62,41 +64,47 @@ export default function RegisterForm() {
     const next = {};
 
     if (!form.full_name.trim()) {
-      next.full_name = 'Full name is required.';
+      next.full_name = t('validation.required', { field: t('full_name') });
     } else {
-      const nameError = getNameValidationError(form.full_name, 'Full name');
+      const nameError = getNameValidationError(form.full_name, t('full_name'));
       if (nameError) {
         next.full_name = nameError;
       } else if (form.full_name.trim().length < 2) {
-        next.full_name = 'Full name must be at least 2 characters.';
+        next.full_name = t('validation.min_chars', {
+          field: t('full_name'),
+          count: 2,
+        });
       }
     }
 
     if (!form.phone.trim()) {
-      next.phone = 'Phone number is required.';
+      next.phone = t('validation.phone_required');
     } else {
       const phoneError = getPhoneValidationError(form.phone);
       if (phoneError) next.phone = phoneError;
     }
 
     if (!form.email.trim()) {
-      next.email = 'Email is required.';
+      next.email = t('validation.required', { field: t('email') });
     } else if (!validateEmail(form.email)) {
-      next.email = 'Enter a valid email address.';
+      next.email = t('validation.email_invalid');
     }
 
-    if (!form.district) next.district = 'District is required.';
+    if (!form.district)
+      next.district = t('validation.required', {
+        field: t('profile_fields.district'),
+      });
 
     const passwordError = getPasswordValidationError(form.password);
     if (passwordError) next.password = passwordError;
 
     if (!form.confirm_password) {
-      next.confirm_password = 'Confirm your password.';
+      next.confirm_password = t('validation.confirm_password');
     } else if (form.password !== form.confirm_password) {
-      next.confirm_password = 'Passwords do not match.';
+      next.confirm_password = t('validation.passwords_match');
     }
 
-    if (!form.agree_terms) next.agree_terms = 'You must agree to the terms.';
+    if (!form.agree_terms) next.agree_terms = t('validation.agree_terms');
 
     return next;
   };
@@ -124,7 +132,12 @@ export default function RegisterForm() {
       const user = await register(payload);
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || 'Registration failed');
+      setError(
+        getApiErrorMessage(
+          requestError,
+          t('auth.registration_failed', { defaultValue: 'Registration failed' }),
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -150,13 +163,13 @@ export default function RegisterForm() {
     <div className="w-full max-w-lg animate-fadeIn">
       <div className="mb-6">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-emerald-700">
-          <ShieldCheck className="h-4 w-4" /> Role-based registration
+          <ShieldCheck className="h-4 w-4" /> {t('auth.register_badge')}
         </div>
         <h1 className="mt-4 font-display text-3xl font-black tracking-tight text-slate-950">
           {t('create_account')}
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Choose how you will use the paddy management and marketplace system.
+          {t('auth.register_subtitle')}
         </p>
       </div>
       <div className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40 sm:p-8">
@@ -240,9 +253,11 @@ export default function RegisterForm() {
                   errors.district ? 'district-error' : undefined
                 }
               >
-                <option value="">Select district</option>
+                <option value="">{t('forms.select_district')}</option>
                 {DISTRICTS.map((district) => (
-                  <option key={district}>{district}</option>
+                  <option key={district} value={district}>
+                    {formatDistrict(district)}
+                  </option>
                 ))}
               </select>
               {fieldError('district')}
@@ -279,8 +294,7 @@ export default function RegisterForm() {
               }
             />
             <span className="text-sm leading-5 text-slate-600">
-              {t('agree_terms')} and understand that payment integrations must
-              be configured for production.
+              {t('agree_terms')} {t('auth.terms_suffix')}
             </span>
           </label>
           {fieldError('agree_terms')}

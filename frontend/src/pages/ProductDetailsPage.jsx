@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -20,10 +21,16 @@ import ErrorAlert from '../components/common/ErrorAlert';
 import useFetch from '../hooks/useFetch';
 import productService from '../services/productService';
 import reviewService from '../services/reviewService';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import {
+  formatCurrency,
+  formatDate,
+  formatDistrict,
+  formatVariety,
+} from '../utils/formatters';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProductDetailsPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -40,10 +47,11 @@ export default function ProductDetailsPage() {
 
   if (loading) return <Loader />;
   if (error || !product)
-    return <ErrorAlert message={error || 'Product not found'} />;
+    return <ErrorAlert message={error || t('product.not_found')} />;
 
   const image = product.image_urls?.[0];
   const isOwner = user?.id === product.farmer_id;
+  const priceUnitKg = product.price_unit_kg || 72;
 
   return (
     <div className="mx-auto max-w-6xl space-y-7 animate-fadeIn">
@@ -52,7 +60,7 @@ export default function ProductDetailsPage() {
         onClick={() => navigate(-1)}
         className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-emerald-700"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to marketplace
+        <ArrowLeft className="h-4 w-4" /> {t('common.back_to_marketplace')}
       </button>
       <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid lg:grid-cols-[1.03fr_0.97fr]">
@@ -68,65 +76,68 @@ export default function ProductDetailsPage() {
                 <div className="text-center text-emerald-800">
                   <Leaf className="mx-auto h-16 w-16 opacity-40" />
                   <p className="mt-3 text-sm font-black uppercase tracking-wider">
-                    Paddy harvest
+                    {t('product.paddy_harvest')}
                   </p>
                 </div>
               </div>
             )}
             {product.is_organic && (
               <span className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-black text-emerald-700 shadow-lg backdrop-blur">
-                <Leaf className="h-3.5 w-3.5" /> Organic
+                <Leaf className="h-3.5 w-3.5" /> {t('organic')}
               </span>
             )}
           </div>
           <div className="p-6 sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-700">
-                Active listing
+                {t('common.active_listing')}
               </span>
               {product.farmer_verified && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
-                  <BadgeCheck className="h-3.5 w-3.5" /> Verified farmer
+                  <BadgeCheck className="h-3.5 w-3.5" />{' '}
+                  {t('product.verified_farmer')}
                 </span>
               )}
             </div>
             <h1 className="mt-5 font-display text-4xl font-black tracking-tight text-slate-950">
-              {product.variety}
+              {formatVariety(product.variety)}
             </h1>
             <div className="mt-4 flex items-end gap-2">
               <span className="text-4xl font-black text-emerald-700">
                 {formatCurrency(product.price_per_kg)}
               </span>
               <span className="pb-1 text-sm font-semibold text-slate-400">
-                per kg
+                {t('prices.per_unit', { unit: priceUnitKg })}
               </span>
             </div>
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <div className="detail-tile">
                 <Scale className="h-5 w-5" />
                 <div>
-                  <p>Available quantity</p>
-                  <strong>{product.quantity_kg} kg</strong>
+                  <p>{t('product.available_quantity')}</p>
+                  <strong>
+                    {product.quantity_kg} {t('common.kg')}
+                  </strong>
                 </div>
               </div>
               <div className="detail-tile">
                 <MapPin className="h-5 w-5" />
                 <div>
-                  <p>Location</p>
-                  <strong>{product.region || product.district}</strong>
+                  <p>{t('common.location')}</p>
+                  <strong>{product.region || formatDistrict(product.district)}</strong>
                 </div>
               </div>
               <div className="detail-tile">
                 <CalendarDays className="h-5 w-5" />
                 <div>
-                  <p>Harvest date</p>
+                  <p>{t('harvest_date')}</p>
                   <strong>{formatDate(product.harvest_date)}</strong>
                 </div>
               </div>
               <div className="detail-tile">
                 <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
                 <div>
-                  <p>Listing rating</p>
+                  <p>{t('product.listing_rating')}</p>
                   <strong>
                     {Number(product.rating || 0).toFixed(1)} (
                     {product.total_reviews || 0})
@@ -137,7 +148,7 @@ export default function ProductDetailsPage() {
             {product.description && (
               <div className="mt-7 border-t border-slate-100 pt-6">
                 <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
-                  About this harvest
+                  {t('product.about_harvest')}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {product.description}
@@ -154,8 +165,9 @@ export default function ProductDetailsPage() {
                     <p className="font-black">{product.farmer_name}</p>
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
                       <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{' '}
-                      {Number(product.farmer_rating || 0).toFixed(1)} farmer
-                      rating · {product.district}
+                      {Number(product.farmer_rating || 0).toFixed(1)}{' '}
+                      {t('product.farmer_rating')} ·{' '}
+                      {formatDistrict(product.district)}
                     </p>
                   </div>
                 </div>
@@ -175,7 +187,7 @@ export default function ProductDetailsPage() {
               )}
               {isOwner && (
                 <span className="self-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
-                  This is your listing
+                  {t('product.your_listing')}
                 </span>
               )}
             </div>

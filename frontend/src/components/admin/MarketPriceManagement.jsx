@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import priceService from '../../services/priceService';
-import { PADDY_VARIETIES } from '../../utils/constants';
+import { MARKET_PRICE_UNITS, PADDY_VARIETIES } from '../../utils/constants';
+import { formatVariety } from '../../utils/formatters';
+import { getApiErrorMessage } from '../../utils/forms';
 
 const priceKey = (variety) => variety.toLowerCase().replaceAll(' ', '_');
 
 export default function MarketPriceManagement() {
+  const { t } = useTranslation();
   const initialPrices = useMemo(
     () =>
       Object.fromEntries(
@@ -16,6 +20,7 @@ export default function MarketPriceManagement() {
   );
   const [prices, setPrices] = useState(initialPrices);
   const [region, setRegion] = useState('national');
+  const [priceUnitKg, setPriceUnitKg] = useState(MARKET_PRICE_UNITS[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -35,7 +40,7 @@ export default function MarketPriceManagement() {
     );
 
     if (!Object.keys(cleanPrices).length) {
-      setError('Enter at least one market price.');
+      setError(t('pages.admin.enter_price'));
       return;
     }
     if (
@@ -43,19 +48,22 @@ export default function MarketPriceManagement() {
         (value) => !Number.isFinite(value) || value <= 0,
       )
     ) {
-      setError('Every entered price must be greater than zero.');
+      setError(t('pages.admin.positive_price'));
       return;
     }
 
     setLoading(true);
     setError('');
     try {
-      await priceService.updatePrices({ region, prices: cleanPrices });
+      await priceService.updatePrices({
+        region,
+        prices: cleanPrices,
+        price_unit_kg: priceUnitKg,
+      });
       setSuccess(true);
     } catch (requestError) {
       setError(
-        requestError.response?.data?.detail ||
-          'Failed to update market prices.',
+        getApiErrorMessage(requestError, t('pages.admin.price_failed')),
       );
     } finally {
       setLoading(false);
@@ -67,13 +75,13 @@ export default function MarketPriceManagement() {
       <ErrorAlert message={error} onDismiss={() => setError('')} />
       {success && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-          Market prices updated successfully.
+          {t('pages.admin.price_updated')}
         </div>
       )}
 
       <div>
         <label className="label" htmlFor="market-region">
-          Region
+          {t('region')}
         </label>
         <select
           id="market-region"
@@ -81,8 +89,32 @@ export default function MarketPriceManagement() {
           onChange={(event) => setRegion(event.target.value)}
           className="input-field"
         >
-          <option value="national">National</option>
-          <option value="anuradhapura">Anuradhapura</option>
+          <option value="national">{t('pages.admin.national')}</option>
+          <option value="anuradhapura">
+            {t('districts.Anuradhapura')}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label className="label" htmlFor="market-price-unit">
+          {t('pages.admin.price_unit')}
+        </label>
+        <select
+          id="market-price-unit"
+          value={priceUnitKg}
+          onChange={(event) => {
+            setPriceUnitKg(Number(event.target.value));
+            setSuccess(false);
+            setError('');
+          }}
+          className="input-field"
+        >
+          {MARKET_PRICE_UNITS.map((unit) => (
+            <option key={unit} value={unit}>
+              {t('prices.unit_kg', { unit })}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -93,7 +125,7 @@ export default function MarketPriceManagement() {
               className="text-sm font-medium capitalize"
               htmlFor={`price-${key}`}
             >
-              {key.replaceAll('_', ' ')}
+              {formatVariety(key)}
             </label>
             <input
               id={`price-${key}`}
@@ -103,14 +135,14 @@ export default function MarketPriceManagement() {
               value={value}
               onChange={(event) => handlePriceChange(key, event.target.value)}
               className="input-field"
-              placeholder="Rs/kg"
+              placeholder={t('prices.price_for_unit', { unit: priceUnitKg })}
             />
           </div>
         ))}
       </div>
 
       <Button type="submit" loading={loading}>
-        Update Prices
+        {t('common.update_prices')}
       </Button>
     </form>
   );

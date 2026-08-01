@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 import { DISTRICTS } from '../../utils/constants';
+import { formatDistrict } from '../../utils/formatters';
 
 export default function SearchFilter({
   filters,
@@ -7,6 +9,7 @@ export default function SearchFilter({
   onReset,
   totalResults,
 }) {
+  const { t } = useTranslation();
   const set = (key, value) => onChange({ ...filters, [key]: value });
   const setSort = (value) => {
     if (value === 'price_asc')
@@ -31,20 +34,22 @@ export default function SearchFilter({
             type="text"
             value={filters.variety || ''}
             onChange={(event) => set('variety', event.target.value)}
-            placeholder="Search variety..."
+            placeholder={t('common.search_variety_placeholder')}
             className="flex-1 text-sm outline-none bg-transparent"
           />
           {filters.variety && (
             <button
               type="button"
               onClick={() => set('variety', '')}
-              aria-label="Clear search"
+              aria-label={t('common.clear_search')}
             >
               <X className="w-4 h-4 text-gray-400" />
             </button>
           )}
         </div>
-        <span className="text-sm text-gray-500">{totalResults} listings</span>
+        <span className="text-sm text-gray-500">
+          {totalResults} {t('common.listings')}
+        </span>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -53,9 +58,11 @@ export default function SearchFilter({
           onChange={(event) => set('region', event.target.value)}
           className="input-field py-2 text-sm w-auto"
         >
-          <option value="">All Regions</option>
+          <option value="">{t('common.all_regions')}</option>
           {DISTRICTS.map((district) => (
-            <option key={district}>{district}</option>
+            <option key={district} value={district}>
+              {formatDistrict(district)}
+            </option>
           ))}
         </select>
         <select
@@ -63,9 +70,9 @@ export default function SearchFilter({
           onChange={(event) => setSort(event.target.value)}
           className="input-field py-2 text-sm w-auto"
         >
-          <option value="newest">Newest</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
+          <option value="newest">{t('common.newest')}</option>
+          <option value="price_asc">{t('common.price_low_high')}</option>
+          <option value="price_desc">{t('common.price_high_low')}</option>
         </select>
         <label className="flex items-center gap-2 text-sm bg-white border rounded-lg px-3">
           <input
@@ -75,7 +82,7 @@ export default function SearchFilter({
               set('is_organic', event.target.checked ? true : undefined)
             }
           />
-          Organic only
+          {t('pages.marketplace.organic_only')}
         </label>
         {(filters.variety || filters.region || filters.is_organic) && (
           <button
@@ -83,7 +90,7 @@ export default function SearchFilter({
             onClick={onReset}
             className="text-sm text-red-500 font-medium flex items-center gap-1"
           >
-            <X className="w-3.5 h-3.5" /> Clear
+            <X className="w-3.5 h-3.5" /> {t('common.clear')}
           </button>
         )}
       </div>

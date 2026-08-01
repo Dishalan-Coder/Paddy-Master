@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CreditCard,
   MapPin,
@@ -11,10 +12,13 @@ import ErrorAlert from '../common/ErrorAlert';
 import PaymentModal from '../payments/PaymentModal';
 import ReviewModal from '../reviews/ReviewModal';
 import orderService from '../../services/orderService';
+import { getApiErrorMessage } from '../../utils/forms';
 import {
   formatCurrency,
   formatDateTime,
   formatOrderStatus,
+  formatPaymentMethod,
+  formatVariety,
 } from '../../utils/formatters';
 
 const statusClass = {
@@ -28,6 +32,7 @@ const statusClass = {
 };
 
 export default function BuyerOrders({ orders, onStatusChange }) {
+  const { t } = useTranslation();
   const [updating, setUpdating] = useState(null);
   const [paymentOrder, setPaymentOrder] = useState(null);
   const [reviewOrder, setReviewOrder] = useState(null);
@@ -36,7 +41,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
   const cancel = async (orderId) => {
     if (
       !window.confirm(
-        'Cancel this order? The reserved stock will return to the listing.',
+        t('order.cancel_confirm'),
       )
     )
       return;
@@ -47,7 +52,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
       onStatusChange?.();
     } catch (requestError) {
       setError(
-        requestError.response?.data?.detail || 'Could not cancel the order.',
+        getApiErrorMessage(requestError, t('order.cancel_failed')),
       );
     } finally {
       setUpdating(null);
@@ -59,7 +64,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
       <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white py-16 text-center">
         <PackageCheck className="mx-auto h-9 w-9 text-slate-300" />
         <p className="mt-3 text-sm font-semibold text-slate-400">
-          No orders yet. Browse the marketplace to purchase paddy.
+          {t('pages.orders.buyer_none')}
         </p>
       </div>
     );
@@ -87,14 +92,17 @@ export default function BuyerOrders({ orders, onStatusChange }) {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-black text-slate-900">
-                    {order.product_variety || 'Paddy order'}
+                    {order.product_variety
+                      ? formatVariety(order.product_variety)
+                      : t('order.paddy_order')}
                   </h3>
                   <span className={statusClass[order.status] || 'badge-blue'}>
                     {formatOrderStatus(order.status)}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
-                  {order.quantity_kg} kg · {formatCurrency(order.total_price)}
+                  {order.quantity_kg} {t('common.kg')} ·{' '}
+                  {formatCurrency(order.total_price)}
                 </p>
                 <p className="mt-2 text-xs text-slate-400">
                   Order #{order._id.slice(-6).toUpperCase()} ·{' '}
@@ -104,7 +112,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
             </div>
             <div className="text-left lg:text-right">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Payment
+                {t('common.payment')}
               </p>
               <p
                 className={`mt-1 text-sm font-black ${order.payment_status === 'paid' ? 'text-emerald-700' : order.payment_status === 'failed' ? 'text-red-600' : 'text-amber-700'}`}
@@ -112,7 +120,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
                 {formatOrderStatus(order.payment_status || 'pending')}
               </p>
               <p className="text-xs text-slate-400">
-                {formatOrderStatus(order.payment_method || 'cash_on_delivery')}
+                {formatPaymentMethod(order.payment_method || 'cash_on_delivery')}
               </p>
             </div>
           </div>
@@ -124,7 +132,9 @@ export default function BuyerOrders({ orders, onStatusChange }) {
               </p>
               <p className="flex items-center gap-1.5">
                 <MessageSquareText className="h-3.5 w-3.5" />
-                Farmer: {order.farmer_name || '—'}{' '}
+                {t('order.farmer_contact', {
+                  name: order.farmer_name || '—',
+                })}{' '}
                 {order.farmer_phone ? `· ${order.farmer_phone}` : ''}
               </p>
             </div>
@@ -137,7 +147,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
                     icon={CreditCard}
                     onClick={() => setPaymentOrder(order)}
                   >
-                    Payment
+                    {t('common.payment')}
                   </Button>
                 )}
               {order.status === 'delivered' && (
@@ -147,7 +157,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
                   icon={Star}
                   onClick={() => setReviewOrder(order)}
                 >
-                  Write review
+                  {t('order.write_review')}
                 </Button>
               )}
               {['pending', 'confirmed'].includes(order.status) && (
@@ -157,7 +167,7 @@ export default function BuyerOrders({ orders, onStatusChange }) {
                   loading={updating === order._id}
                   onClick={() => cancel(order._id)}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
               )}
             </div>

@@ -10,6 +10,7 @@ from app.models.order import OrderCreate, OrderStatus
 from app.models.payment import PaymentMethod, PaymentStatus
 from app.models.product import ProductStatus
 from app.services.notification_service import create_notification
+from app.services.product_service import resolve_product_pricing
 from app.services.s3_service import resolve_file_url
 from app.utils.mongo import object_id_or_none, serialize_document
 
@@ -89,14 +90,17 @@ async def create_order(buyer_id, data: OrderCreate) -> dict:
             },
         )
 
+    price_unit_kg, unit_price, unit_price_per_kg = resolve_product_pricing(product)
     payment_method = data.payment_method.value
     doc = {
         "product_id": product_id,
         "buyer_id": buyer_id,
         "farmer_id": product["farmer_id"],
         "quantity_kg": quantity,
-        "unit_price": float(product["price_per_kg"]),
-        "total_price": round(quantity * float(product["price_per_kg"]), 2),
+        "unit_price": unit_price,
+        "price_unit_kg": price_unit_kg,
+        "unit_price_per_kg": unit_price_per_kg,
+        "total_price": round(quantity * unit_price_per_kg, 2),
         "delivery_address": data.delivery_address.strip(),
         "notes": data.notes.strip() if data.notes else None,
         "status": OrderStatus.PENDING.value,

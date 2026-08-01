@@ -1,9 +1,15 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
-import { DISTRICTS, PADDY_VARIETIES } from '../../utils/constants';
+import {
+  DISTRICTS,
+  MARKET_PRICE_UNITS,
+  PADDY_VARIETIES,
+} from '../../utils/constants';
 import { fieldClass, hasErrors, toPositiveNumber } from '../../utils/forms';
+import { formatDistrict, formatVariety } from '../../utils/formatters';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_IMAGES = 5;
@@ -18,6 +24,7 @@ const INITIAL_FORM = {
   variety: '',
   quantity_kg: '',
   price_per_kg: '',
+  price_unit_kg: MARKET_PRICE_UNITS[0],
   region: '',
   district: '',
   harvest_date: '',
@@ -31,6 +38,7 @@ export default function ProductForm({
   serverError,
   onDismissServerError,
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
@@ -58,7 +66,7 @@ export default function ProductForm({
     if (files.length > MAX_IMAGES) {
       setErrors((current) => ({
         ...current,
-        images: `Choose a maximum of ${MAX_IMAGES} images.`,
+        images: t('validation.image_max', { count: MAX_IMAGES }),
       }));
       event.target.value = '';
       return;
@@ -70,7 +78,7 @@ export default function ProductForm({
     if (unsupported) {
       setErrors((current) => ({
         ...current,
-        images: `${unsupported.name} must be a JPG, PNG, WebP, or GIF image.`,
+        images: t('validation.image_type', { name: unsupported.name }),
       }));
       event.target.value = '';
       return;
@@ -80,7 +88,7 @@ export default function ProductForm({
     if (tooLarge) {
       setErrors((current) => ({
         ...current,
-        images: `${tooLarge.name} is larger than 5 MB.`,
+        images: t('validation.image_size', { name: tooLarge.name }),
       }));
       event.target.value = '';
       return;
@@ -96,18 +104,36 @@ export default function ProductForm({
     const description = form.description.trim();
     const region = form.region.trim();
 
-    if (!form.variety) next.variety = 'Paddy variety is required.';
-    if (!form.district) next.district = 'District is required.';
+    if (!form.variety)
+      next.variety = t('validation.required', { field: t('variety') });
+    if (!form.district)
+      next.district = t('validation.required', { field: t('district') });
     if (region.length > 100)
-      next.region = 'Town or region must be 100 characters or less.';
-    if (!form.quantity_kg) next.quantity_kg = 'Quantity is required.';
+      next.region = t('validation.max_chars', {
+        field: t('forms.town_region'),
+        count: 100,
+      });
+    if (!form.quantity_kg)
+      next.quantity_kg = t('validation.required', {
+        field: t('common.quantity'),
+      });
     else if (!quantity)
-      next.quantity_kg = 'Quantity must be greater than zero.';
-    if (!form.price_per_kg) next.price_per_kg = 'Price per kg is required.';
+      next.quantity_kg = t('validation.positive', {
+        field: t('common.quantity'),
+      });
+    if (!form.price_per_kg)
+      next.price_per_kg = t('validation.required', {
+        field: t('forms.price_unit_price_rs'),
+      });
     else if (!price)
-      next.price_per_kg = 'Price per kg must be greater than zero.';
+      next.price_per_kg = t('validation.positive', {
+        field: t('forms.price_unit_price_rs'),
+      });
     if (description.length > 1000)
-      next.description = 'Description must be 1000 characters or less.';
+      next.description = t('validation.max_chars', {
+        field: t('description'),
+        count: 1000,
+      });
 
     return next;
   };
@@ -126,6 +152,7 @@ export default function ProductForm({
       variety: form.variety,
       quantity_kg: toPositiveNumber(form.quantity_kg),
       price_per_kg: toPositiveNumber(form.price_per_kg),
+      price_unit_kg: form.price_unit_kg,
       region: form.region.trim() || form.district,
       district: form.district,
       harvest_date: form.harvest_date || undefined,
@@ -162,7 +189,7 @@ export default function ProductForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="product_variety" className="label">
-            Variety
+            {t('variety')}
           </label>
           <select
             id="product_variety"
@@ -173,16 +200,18 @@ export default function ProductForm({
             aria-invalid={Boolean(errors.variety)}
             aria-describedby={errors.variety ? 'variety-error' : undefined}
           >
-            <option value="">Select variety</option>
+            <option value="">{t('forms.select_variety')}</option>
             {PADDY_VARIETIES.map((variety) => (
-              <option key={variety}>{variety}</option>
+              <option key={variety} value={variety}>
+                {formatVariety(variety)}
+              </option>
             ))}
           </select>
           {fieldError('variety')}
         </div>
         <div>
           <label htmlFor="product_district" className="label">
-            District
+            {t('district')}
           </label>
           <select
             id="product_district"
@@ -193,9 +222,11 @@ export default function ProductForm({
             aria-invalid={Boolean(errors.district)}
             aria-describedby={errors.district ? 'district-error' : undefined}
           >
-            <option value="">Select district</option>
+            <option value="">{t('forms.select_district')}</option>
             {DISTRICTS.map((district) => (
-              <option key={district}>{district}</option>
+              <option key={district} value={district}>
+                {formatDistrict(district)}
+              </option>
             ))}
           </select>
           {fieldError('district')}
@@ -203,7 +234,7 @@ export default function ProductForm({
       </div>
       <div>
         <label htmlFor="product_region" className="label">
-          Town / region
+          {t('forms.town_region')}
         </label>
         <input
           id="product_region"
@@ -212,16 +243,16 @@ export default function ProductForm({
           onChange={handleChange}
           className={fieldClass(errors, 'region')}
           maxLength={100}
-          placeholder="Uses district when left empty"
+          placeholder={t('forms.region_placeholder')}
           aria-invalid={Boolean(errors.region)}
           aria-describedby={errors.region ? 'region-error' : undefined}
         />
         {fieldError('region')}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="product_quantity" className="label">
-            Quantity (kg)
+            {t('quantity_kg')}
           </label>
           <input
             id="product_quantity"
@@ -241,8 +272,26 @@ export default function ProductForm({
           {fieldError('quantity_kg')}
         </div>
         <div>
+          <label htmlFor="product_price_unit" className="label">
+            {t('pages.admin.price_unit')}
+          </label>
+          <select
+            id="product_price_unit"
+            name="price_unit_kg"
+            value={form.price_unit_kg}
+            onChange={handleChange}
+            className="input-field"
+          >
+            {MARKET_PRICE_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {t('prices.unit_kg', { unit })}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
           <label htmlFor="product_price" className="label">
-            Price/kg (Rs.)
+            {t('forms.price_unit_price_rs')}
           </label>
           <input
             id="product_price"
@@ -254,6 +303,9 @@ export default function ProductForm({
             onChange={handleChange}
             className={fieldClass(errors, 'price_per_kg')}
             inputMode="decimal"
+            placeholder={t('prices.price_for_unit', {
+              unit: form.price_unit_kg,
+            })}
             aria-invalid={Boolean(errors.price_per_kg)}
             aria-describedby={
               errors.price_per_kg ? 'price_per_kg-error' : undefined
@@ -264,7 +316,7 @@ export default function ProductForm({
       </div>
       <div>
         <label htmlFor="product_harvest_date" className="label">
-          Harvest date
+          {t('harvest_date')}
         </label>
         <input
           id="product_harvest_date"
@@ -277,7 +329,7 @@ export default function ProductForm({
       </div>
       <div>
         <label htmlFor="product_description" className="label">
-          Description
+          {t('description')}
         </label>
         <textarea
           id="product_description"
@@ -287,7 +339,7 @@ export default function ProductForm({
           rows={3}
           className={fieldClass(errors, 'description')}
           maxLength={1000}
-          placeholder="Moisture level, grade, packaging, pickup availability..."
+          placeholder={t('forms.product_description_placeholder')}
           aria-invalid={Boolean(errors.description)}
           aria-describedby={
             errors.description
@@ -314,17 +366,17 @@ export default function ProductForm({
           className="h-4 w-4"
         />
         <span className="text-sm font-semibold text-slate-600">
-          Organic harvest
+          {t('forms.organic_harvest')}
         </span>
       </label>
       <div>
         <label htmlFor="product_images" className="label">
-          Images
+          {t('common.images')}
         </label>
         <div className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center">
           <Upload className="mx-auto mb-2 h-8 w-8 text-slate-400" />
           <p className="text-sm font-semibold text-slate-500">
-            Up to 5 images, 5 MB each
+            {t('forms.image_help')}
           </p>
           <input
             id="product_images"
@@ -337,14 +389,14 @@ export default function ProductForm({
           />
           <p id="images-help" className="mt-2 text-xs text-slate-400">
             {images.length
-              ? `${images.length} selected`
-              : 'JPG, PNG, WebP, or GIF'}
+              ? t('common.selected_count', { count: images.length })
+              : t('forms.image_types')}
           </p>
         </div>
         {fieldError('images')}
       </div>
       <Button type="submit" loading={loading}>
-        List paddy
+        {t('add_product')}
       </Button>
     </form>
   );

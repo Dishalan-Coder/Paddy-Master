@@ -10,6 +10,7 @@ import {
   getPasswordValidationError,
   validateLoginId,
 } from '../../utils/validators';
+import { getApiErrorMessage } from '../../utils/forms';
 import PasswordField from './PasswordField';
 
 export default function LoginForm() {
@@ -32,10 +33,9 @@ export default function LoginForm() {
     const next = {};
 
     if (!form.login_id.trim()) {
-      next.login_id = 'Phone number or email is required.';
+      next.login_id = t('validation.login_id_required');
     } else if (!validateLoginId(form.login_id)) {
-      next.login_id =
-        'Enter a valid email address or 10-digit phone number starting with 07.';
+      next.login_id = t('validation.login_id_invalid');
     }
 
     const passwordError = getPasswordValidationError(form.password);
@@ -63,7 +63,12 @@ export default function LoginForm() {
       });
       navigate(user.role === 'admin' ? '/admin' : '/dashboard');
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || 'Login failed');
+      setError(
+        getApiErrorMessage(
+          requestError,
+          t('auth.login_failed', { defaultValue: 'Login failed' }),
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -83,13 +88,13 @@ export default function LoginForm() {
     <div className="w-full max-w-md animate-fadeIn">
       <div className="mb-7">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-emerald-700">
-          <ShieldCheck className="h-4 w-4" /> Secure account access
+          <ShieldCheck className="h-4 w-4" /> {t('auth.login_badge')}
         </div>
         <h1 className="mt-4 font-display text-3xl font-black tracking-tight text-slate-950">
           {t('login')}
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Open your farmer, buyer, or administrator workspace.
+          {t('auth.login_subtitle')}
         </p>
       </div>
       <div className="rounded-[1.6rem] border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/40 sm:p-8">

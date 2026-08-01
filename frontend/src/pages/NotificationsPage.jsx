@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import useFetch from '../hooks/useFetch';
 import notificationService from '../services/notificationService';
 import NotificationPanel from '../components/notifications/NotificationPanel';
 import ErrorAlert from '../components/common/ErrorAlert';
 
 export default function NotificationsPage() {
+  const { t } = useTranslation();
   const { data, loading, error, refetch } = useFetch(
     () => notificationService.getAll({ limit: 100 }),
     [],
@@ -19,10 +21,10 @@ export default function NotificationsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 animate-fadeIn">
       <div>
-        <p className="page-kicker">Updates and reminders</p>
-        <h1 className="page-title">Notifications</h1>
+        <p className="page-kicker">{t('pages.notifications.kicker')}</p>
+        <h1 className="page-title">{t('pages.notifications.title')}</h1>
         <p className="page-copy">
-          Order activity, payment updates, weather warnings, and farm reminders.
+          {t('pages.notifications.copy')}
         </p>
       </div>
       <ErrorAlert message={error} />

@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
+import { formatRole } from '../../utils/formatters';
 
 const farmerLinks = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'dashboard' },
@@ -66,7 +67,7 @@ export default function Sidebar({ open, onClose }) {
       {open && (
         <button
           type="button"
-          aria-label="Close navigation"
+          aria-label={t('common.close_navigation')}
           className="fixed inset-0 z-40 bg-slate-950/50 lg:hidden"
           onClick={onClose}
         />
@@ -86,7 +87,7 @@ export default function Sidebar({ open, onClose }) {
         </div>
         <div className="px-5 pt-5">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400/70">
-            Workspace
+            {t('common.workspace')}
           </p>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
@@ -125,7 +126,7 @@ export default function Sidebar({ open, onClose }) {
                 {user?.full_name}
               </p>
               <p className="text-xs capitalize text-emerald-200/60">
-                {user?.role}
+                {formatRole(user?.role)}
               </p>
             </div>
           </div>

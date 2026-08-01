@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 
@@ -11,10 +12,13 @@ export default function PasswordField({
   error,
   autoComplete,
 }) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const errorId = `${id}-error`;
   const Icon = visible ? EyeOff : Eye;
-  const action = visible ? 'Hide' : 'Show';
+  const action = visible
+    ? t('common.hide', { defaultValue: 'Hide' })
+    : t('common.show', { defaultValue: 'Show' });
 
   return (
     <div>

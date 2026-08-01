@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star, X } from 'lucide-react';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import reviewService from '../../services/reviewService';
 import { fieldClass, getApiErrorMessage, hasErrors } from '../../utils/forms';
+import { formatVariety } from '../../utils/formatters';
 
 export default function ReviewModal({ order, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [errors, setErrors] = useState({});
@@ -17,12 +20,12 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
     const review = comment.trim();
 
     if (!rating || rating < 1 || rating > 5)
-      next.rating = 'Choose a rating from 1 to 5 stars.';
-    if (!review) next.comment = 'Review comment is required.';
+      next.rating = t('review.rating_error');
+    if (!review) next.comment = t('review.comment_required');
     else if (review.length < 3)
-      next.comment = 'Review must be at least 3 characters.';
+      next.comment = t('review.comment_min');
     else if (review.length > 1000)
-      next.comment = 'Review must be 1000 characters or less.';
+      next.comment = t('review.comment_max');
 
     return next;
   };
@@ -49,7 +52,7 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
       onClose();
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not submit the review.'),
+        getApiErrorMessage(requestError, t('review.submit_failed')),
       );
     } finally {
       setLoading(false);
@@ -72,10 +75,12 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-              Verified purchase
+              {t('review.verified_purchase')}
             </p>
             <h3 className="mt-1 text-xl font-black">
-              Review {order.product_variety}
+              {t('review.title', {
+                variety: formatVariety(order.product_variety),
+              })}
             </h3>
           </div>
           <button
@@ -89,7 +94,7 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
         <form onSubmit={submit} className="mt-5 space-y-5" noValidate>
           <ErrorAlert message={error} onDismiss={() => setError('')} />
           <div>
-            <label className="label">Rating</label>
+            <label className="label">{t('review.rating')}</label>
             <div
               className="flex gap-1"
               aria-describedby={
@@ -104,7 +109,9 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
                     setRating(star);
                     setErrors((current) => ({ ...current, rating: '' }));
                   }}
-                  aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                  aria-label={t(star === 1 ? 'review.star' : 'review.stars', {
+                    count: star,
+                  })}
                 >
                   <Star
                     className={`h-8 w-8 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
@@ -116,7 +123,7 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
           </div>
           <div>
             <label htmlFor="review_comment" className="label">
-              Your experience
+              {t('review.experience')}
             </label>
             <textarea
               id="review_comment"
@@ -129,7 +136,7 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
                 setErrors((current) => ({ ...current, comment: '' }));
                 setError('');
               }}
-              placeholder="Describe quality, communication, and delivery…"
+              placeholder={t('review.placeholder')}
               aria-invalid={Boolean(errors.comment)}
               aria-describedby={
                 errors.comment
@@ -149,10 +156,10 @@ export default function ReviewModal({ order, onClose, onSuccess }) {
           </div>
           <div className="flex gap-3">
             <Button type="submit" loading={loading} className="flex-1">
-              Submit review
+              {t('review.submit')}
             </Button>
             <Button type="button" variant="secondary" onClick={onClose}>
-              Cancel
+              {t('cancel')}
             </Button>
           </div>
         </form>

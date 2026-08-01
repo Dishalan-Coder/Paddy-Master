@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { translateApiMessage } from './messages';
 
 export const getApiErrorMessage = (
   error,
@@ -6,19 +7,20 @@ export const getApiErrorMessage = (
 ) => {
   const detail = error?.response?.data?.detail;
 
-  if (typeof detail === 'string') return detail;
+  if (typeof detail === 'string') return translateApiMessage(detail, fallback);
   if (Array.isArray(detail)) {
     const message = detail
       .map((item) => item?.msg || item?.message)
       .filter(Boolean)
+      .map((item) => translateApiMessage(item, item))
       .join(' ');
     return message || fallback;
   }
   if (detail && typeof detail === 'object') {
-    return detail.message || fallback;
+    return translateApiMessage(detail.message, fallback);
   }
 
-  return error?.message || fallback;
+  return translateApiMessage(error?.message, fallback);
 };
 
 export const fieldClass = (errors, name, base = 'input-field') =>

@@ -1,32 +1,35 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Banknote, Building2, CreditCard, ShieldCheck, X } from 'lucide-react';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import paymentService from '../../services/paymentService';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatPaymentMethod } from '../../utils/formatters';
+import { getApiErrorMessage } from '../../utils/forms';
 
 const methods = [
   {
     value: 'cash_on_delivery',
-    label: 'Cash on delivery',
+    labelKey: 'cash_on_delivery',
     icon: Banknote,
-    description: 'Payment is marked paid when delivery is completed.',
+    descriptionKey: 'payment.cash_description',
   },
   {
     value: 'bank_transfer',
-    label: 'Bank transfer',
+    labelKey: 'bank_transfer',
     icon: Building2,
-    description: 'Enter your bank reference for processing.',
+    descriptionKey: 'payment.bank_description',
   },
   {
     value: 'card_demo',
-    label: 'Demo card',
+    labelKey: 'card_demo',
     icon: CreditCard,
-    description: 'Local test flow only. No real money is charged.',
+    descriptionKey: 'payment.demo_description',
   },
 ];
 
 export default function PaymentModal({ order, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const [method, setMethod] = useState(
     order.payment_method || 'cash_on_delivery',
   );
@@ -47,7 +50,7 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
       onClose();
     } catch (requestError) {
       setError(
-        requestError.response?.data?.detail || 'Payment could not be updated.',
+        getApiErrorMessage(requestError, t('payment.update_failed')),
       );
     } finally {
       setLoading(false);
@@ -60,13 +63,17 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-              Basic payment
+              {t('payment.basic')}
             </p>
             <h3 className="mt-1 text-xl font-black">
-              Pay {formatCurrency(order.total_price)}
+              {t('payment.pay_amount', {
+                amount: formatCurrency(order.total_price),
+              })}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Order #{order._id.slice(-6).toUpperCase()}
+              {t('payment.order_number', {
+                id: order._id.slice(-6).toUpperCase(),
+              })}
             </p>
           </div>
           <button
@@ -79,7 +86,7 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
         </div>
         <form onSubmit={submit} className="mt-5 space-y-4">
           <ErrorAlert message={error} onDismiss={() => setError('')} />
-          {methods.map(({ value, label, icon: Icon, description }) => (
+          {methods.map(({ value, labelKey, icon: Icon, descriptionKey }) => (
             <label
               key={value}
               className={`flex cursor-pointer gap-3 rounded-2xl border p-4 transition ${method === value ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-200'}`}
@@ -94,21 +101,23 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
                 className={`mt-0.5 h-5 w-5 ${method === value ? 'text-emerald-700' : 'text-slate-400'}`}
               />
               <div>
-                <p className="text-sm font-black">{label}</p>
+                <p className="text-sm font-black">
+                  {formatPaymentMethod(labelKey)}
+                </p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  {description}
+                  {t(descriptionKey)}
                 </p>
               </div>
             </label>
           ))}
           {method === 'bank_transfer' && (
             <div>
-              <label className="label">Transfer reference *</label>
+              <label className="label">{t('payment.transfer_reference')}</label>
               <input
                 className="input-field"
                 value={reference}
                 onChange={(event) => setReference(event.target.value)}
-                placeholder="Example: BOC-384921"
+                placeholder={t('payment.reference_placeholder')}
               />
             </div>
           )}
@@ -116,17 +125,16 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
             <div className="flex gap-2 rounded-xl bg-blue-50 p-3 text-xs leading-5 text-blue-700">
               <ShieldCheck className="h-4 w-4 shrink-0" />
               <p>
-                This demonstrates the application workflow only. Integrate a
-                licensed payment provider before production.
+                {t('payment.demo_notice')}
               </p>
             </div>
           )}
           <div className="flex gap-3 pt-2">
             <Button type="submit" loading={loading} className="flex-1">
-              Confirm payment
+              {t('payment.confirm_payment')}
             </Button>
             <Button type="button" variant="secondary" onClick={onClose}>
-              Close
+              {t('common.close')}
             </Button>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
   BadgeCheck,
@@ -16,7 +17,14 @@ import profileService, {
 } from '../services/profileService';
 import { useAuth } from '../context/AuthContext';
 import { DISTRICTS } from '../utils/constants';
-import { formatCurrency } from '../utils/formatters';
+import {
+  formatCurrency,
+  formatDistrict,
+  formatRole,
+} from '../utils/formatters';
+import { getApiErrorMessage } from '../utils/forms';
+import { translateApiMessage } from '../utils/messages';
+import i18n from '../i18n';
 import {
   getNameValidationError,
   getPhoneValidationError,
@@ -42,6 +50,22 @@ const PROFILE_FIELD_LABELS = {
   bio: 'Profile description',
 };
 
+const translate = (key, options = {}, defaultValue) =>
+  i18n.t(key, { defaultValue, ...options });
+
+const getProfileFieldLabel = (field) => {
+  const labelKeys = {
+    full_name: 'full_name',
+    phone: 'phone',
+    email: 'email_address',
+    district: 'profile_fields.district',
+    address: 'common.address',
+    bio: 'profile_fields.bio',
+  };
+
+  return translate(labelKeys[field], {}, PROFILE_FIELD_LABELS[field]);
+};
+
 export const getProfileFormValues = (profile = {}) => ({
   full_name: profile.full_name || '',
   phone: profile.phone || '',
@@ -51,23 +75,15 @@ export const getProfileFormValues = (profile = {}) => ({
   bio: profile.bio || '',
 });
 
-const getRequestErrorMessage = (requestError, fallback) => {
-  const detail = requestError?.response?.data?.detail;
-  if (typeof detail === 'string') return detail;
-  if (Array.isArray(detail)) {
-    const message = detail
-      .map((item) => item?.msg || item?.message)
-      .filter(Boolean)
-      .join(' ');
-    return message || fallback;
-  }
-  return fallback;
-};
-
 const normalizeServerMessage = (message, field) =>
-  (
-    message || `${PROFILE_FIELD_LABELS[field] || 'This field'} is invalid.`
-  ).replace(/^Value error,\s*/i, '');
+  translateApiMessage(
+    message ||
+      translate(
+        'validation.invalid',
+        { field: getProfileFieldLabel(field) || 'This field' },
+        `${PROFILE_FIELD_LABELS[field] || 'This field'} is invalid.`,
+      ),
+  );
 
 const getServerFieldErrors = (requestError) => {
   const detail = requestError?.response?.data?.detail;
@@ -98,45 +114,69 @@ export const validateProfileForm = (values = {}) => {
   const bio = sanitized.bio || '';
 
   if (!fullName) {
-    next.full_name = 'Full name is required.';
+    next.full_name = translate('validation.required', {
+      field: getProfileFieldLabel('full_name'),
+    });
   } else {
-    const nameError = getNameValidationError(fullName, 'Full name');
+    const nameError = getNameValidationError(
+      fullName,
+      getProfileFieldLabel('full_name'),
+    );
     if (nameError) {
       next.full_name = nameError;
     } else if (fullName.length < 2) {
-      next.full_name = 'Full name must be at least 2 characters.';
+      next.full_name = translate('validation.min_chars', {
+        field: getProfileFieldLabel('full_name'),
+        count: 2,
+      });
     }
   }
 
   if (!next.full_name && fullName.length > 100) {
-    next.full_name = 'Full name must be 100 characters or less.';
+    next.full_name = translate('validation.max_chars', {
+      field: getProfileFieldLabel('full_name'),
+      count: 100,
+    });
   }
 
   if (!phone) {
-    next.phone = 'Phone number is required.';
+    next.phone = translate('validation.phone_required');
   } else {
     const phoneError = getPhoneValidationError(phone);
     if (phoneError) next.phone = phoneError;
   }
 
   if (!email) {
-    next.email = 'Email is required.';
+    next.email = translate('validation.required', {
+      field: getProfileFieldLabel('email'),
+    });
   } else if (!validateEmail(email)) {
-    next.email = 'Enter a valid email address.';
+    next.email = translate('validation.email_invalid');
   } else if (email.length > 100) {
-    next.email = 'Email address must be 100 characters or less.';
+    next.email = translate('validation.max_chars', {
+      field: getProfileFieldLabel('email'),
+      count: 100,
+    });
   }
 
   if (!district) {
-    next.district = 'District is required.';
+    next.district = translate('validation.required', {
+      field: getProfileFieldLabel('district'),
+    });
   } else if (!DISTRICTS.includes(district)) {
-    next.district = 'Select a valid district.';
+    next.district = translate('validation.district_invalid');
   }
 
   if (address.length > 300)
-    next.address = 'Address must be 300 characters or less.';
+    next.address = translate('validation.max_chars', {
+      field: getProfileFieldLabel('address'),
+      count: 300,
+    });
   if (bio.length > 500)
-    next.bio = 'Profile description must be 500 characters or less.';
+    next.bio = translate('validation.max_chars', {
+      field: getProfileFieldLabel('bio'),
+      count: 500,
+    });
 
   return next;
 };
@@ -159,6 +199,7 @@ export const getChangedProfilePayload = (
 };
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, refreshProfile, setUser } = useAuth();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -180,9 +221,9 @@ export default function ProfilePage() {
     setErrors((current) => {
       let nextError = '';
       if (name === 'phone' && /[^\d]/.test(value.trim()))
-        nextError = 'Only numbers can be entered.';
+        nextError = t('validation.only_numbers');
       if (name === 'full_name')
-        nextError = getNameValidationError(value, 'Full name');
+        nextError = getNameValidationError(value, t('full_name'));
       return { ...current, [name]: nextError };
     });
     setError('');
@@ -204,7 +245,7 @@ export default function ProfilePage() {
     if (!Object.keys(updatePayload).length) {
       setErrors({});
       setError('');
-      setSuccess('No profile changes to save.');
+      setSuccess(t('pages.profile.no_changes'));
       return;
     }
 
@@ -216,12 +257,12 @@ export default function ProfilePage() {
       const updatedProfile = await profileService.update(updatePayload);
       setUser(updatedProfile);
       setForm(getProfileFormValues(updatedProfile));
-      setSuccess('Profile updated successfully.');
+      setSuccess(t('pages.profile.updated'));
     } catch (requestError) {
       const serverErrors = getServerFieldErrors(requestError);
       setErrors(serverErrors);
       setError(
-        getRequestErrorMessage(requestError, 'Could not update profile.'),
+        getApiErrorMessage(requestError, t('pages.profile.update_failed')),
       );
     } finally {
       setLoading(false);
@@ -236,12 +277,12 @@ export default function ProfilePage() {
     setSuccess('');
 
     if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
-      setError('Use a JPG, PNG, or WebP image.');
+      setError(t('pages.profile.photo_type'));
       event.target.value = '';
       return;
     }
     if (file.size > MAX_PHOTO_SIZE) {
-      setError('Image must be 5 MB or smaller.');
+      setError(t('pages.profile.photo_size'));
       event.target.value = '';
       return;
     }
@@ -254,9 +295,11 @@ export default function ProfilePage() {
       } else {
         await refreshProfile();
       }
-      setSuccess('Profile photo updated.');
+      setSuccess(t('pages.profile.photo_updated'));
     } catch (requestError) {
-      setError(getRequestErrorMessage(requestError, 'Could not upload photo.'));
+      setError(
+        getApiErrorMessage(requestError, t('pages.profile.upload_failed')),
+      );
     } finally {
       setPhotoLoading(false);
       event.target.value = '';
@@ -282,10 +325,10 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 animate-fadeIn">
       <div>
-        <p className="page-kicker">Account and trust</p>
-        <h1 className="page-title">My profile</h1>
+        <p className="page-kicker">{t('pages.profile.kicker')}</p>
+        <h1 className="page-title">{t('pages.profile.title')}</h1>
         <p className="page-copy">
-          Keep contact, location, and marketplace identity details current.
+          {t('pages.profile.copy')}
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
@@ -297,7 +340,7 @@ export default function ProfilePage() {
                 {user?.profile_image_url ? (
                   <img
                     src={user.profile_image_url}
-                    alt="Profile"
+                    alt={t('pages.profile.photo_alt')}
                     className="h-full w-full rounded-[1.5rem] border-4 border-white object-cover shadow-lg"
                   />
                 ) : (
@@ -312,7 +355,7 @@ export default function ProfilePage() {
                       ? 'cursor-wait opacity-75'
                       : 'cursor-pointer hover:bg-emerald-800',
                   )}
-                  title="Upload profile photo"
+                  title={t('common.upload_profile_photo')}
                 >
                   <Camera className="h-4 w-4" />
                   <input
@@ -326,7 +369,7 @@ export default function ProfilePage() {
               </div>
               <h2 className="mt-4 text-xl font-black">{user?.full_name}</h2>
               <p className="mt-1 text-sm capitalize text-slate-500">
-                {user?.role}
+                {formatRole(user?.role)}
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <span
@@ -337,7 +380,9 @@ export default function ProfilePage() {
                   ) : (
                     <ShieldCheck className="h-3.5 w-3.5" />
                   )}
-                  {user?.is_verified ? 'Verified' : 'Verification pending'}
+                  {user?.is_verified
+                    ? t('common.verified')
+                    : t('common.verification_pending')}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-black text-amber-700">
                   <Star className="h-3.5 w-3.5 fill-amber-400" />
@@ -347,7 +392,7 @@ export default function ProfilePage() {
               {user?.district && (
                 <p className="mt-4 flex items-center justify-center gap-1 text-sm text-slate-500">
                   <MapPin className="h-4 w-4" />
-                  {user.district}
+                  {formatDistrict(user.district)}
                 </p>
               )}
             </div>
@@ -355,13 +400,13 @@ export default function ProfilePage() {
           {user?.role === 'farmer' && (
             <div className="rounded-[1.5rem] bg-slate-950 p-6 text-white">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-300">
-                Farmer wallet
+                {t('pages.profile.farmer_wallet')}
               </p>
               <p className="mt-2 text-3xl font-black">
                 {formatCurrency(user.wallet_balance)}
               </p>
               <p className="mt-2 text-xs leading-5 text-slate-400">
-                Delivered order revenue recorded by the platform.
+                {t('pages.profile.wallet_copy')}
               </p>
             </div>
           )}
@@ -373,10 +418,11 @@ export default function ProfilePage() {
           noValidate
         >
           <div className="mb-6">
-            <h2 className="text-xl font-black">Personal information</h2>
+            <h2 className="text-xl font-black">
+              {t('pages.profile.personal_info')}
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Used for verification, order communication, and local
-              recommendations.
+              {t('pages.profile.personal_info_copy')}
             </p>
           </div>
           <ErrorAlert message={error} onDismiss={() => setError('')} />
@@ -388,7 +434,7 @@ export default function ProfilePage() {
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="profile_full_name" className="label">
-                Full name
+                {t('full_name')}
               </label>
               <input
                 id="profile_full_name"
@@ -407,7 +453,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label htmlFor="profile_phone" className="label">
-                Phone number
+                {t('phone')}
               </label>
               <input
                 id="profile_phone"
@@ -427,7 +473,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label htmlFor="profile_email" className="label">
-                Email address
+                {t('email_address')}
               </label>
               <input
                 id="profile_email"
@@ -445,7 +491,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label htmlFor="profile_district" className="label">
-                District
+                {t('profile_fields.district')}
               </label>
               <select
                 id="profile_district"
@@ -458,16 +504,18 @@ export default function ProfilePage() {
                   errors.district ? 'district-error' : undefined
                 }
               >
-                <option value="">Select district</option>
+                <option value="">{t('forms.select_district')}</option>
                 {DISTRICTS.map((district) => (
-                  <option key={district}>{district}</option>
+                  <option key={district} value={district}>
+                    {formatDistrict(district)}
+                  </option>
                 ))}
               </select>
               {fieldError('district')}
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="profile_address" className="label">
-                Address
+                {t('common.address')}
               </label>
               <textarea
                 id="profile_address"
@@ -485,7 +533,7 @@ export default function ProfilePage() {
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="profile_bio" className="label">
-                Short profile description
+                {t('pages.profile.bio_label')}
               </label>
               <textarea
                 id="profile_bio"
@@ -495,7 +543,7 @@ export default function ProfilePage() {
                 className={fieldClass('bio')}
                 value={form.bio}
                 onChange={change}
-                placeholder="Tell buyers or farmers about your business, capacity, and experience."
+                placeholder={t('pages.profile.bio_placeholder')}
                 aria-invalid={Boolean(errors.bio)}
                 aria-describedby={
                   errors.bio
@@ -516,7 +564,7 @@ export default function ProfilePage() {
           </div>
           <div className="mt-6 flex justify-end">
             <Button type="submit" loading={loading}>
-              Save profile
+              {t('common.save_profile')}
             </Button>
           </div>
         </form>
