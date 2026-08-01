@@ -1,13 +1,15 @@
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import StatusPage from '../components/common/StatusPage';
 
-const getErrorMessage = (error) => {
-  if (!error) return 'The page could not be loaded safely.';
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
   if (typeof error === 'string') return error;
-  return error.message || 'The page could not be loaded safely.';
+  return error.message || fallback;
 };
 
 export default function ErrorPage({ error, resetError }) {
+  const { t } = useTranslation();
   const retry = () => {
     if (resetError) {
       resetError();
@@ -18,19 +20,22 @@ export default function ErrorPage({ error, resetError }) {
 
   return (
     <StatusPage
-      description="Something interrupted this screen. You can retry the request or return to the home page while the issue settles."
+      description={t('status_pages.error_description')}
       details={[
-        { label: 'Status', value: 'Action needed' },
-        { label: 'Impact', value: 'Current page only' },
-        { label: 'Message', value: getErrorMessage(error) },
+        { label: t('common.status'), value: t('status_pages.action_needed') },
+        { label: t('status_pages.impact'), value: t('status_pages.current_page_only') },
+        {
+          label: t('status_pages.message'),
+          value: getErrorMessage(error, t('status_pages.safe_load_failed')),
+        },
       ]}
-      eyebrow="Error"
+      eyebrow={t('status_pages.error_eyebrow')}
       icon={AlertTriangle}
       onRetry={retry}
-      primaryLabel="Retry"
+      primaryLabel={t('common.retry')}
       secondaryHref="/"
       tone="red"
-      title="Something went wrong"
+      title={t('status_pages.error_title')}
     />
   );
 }

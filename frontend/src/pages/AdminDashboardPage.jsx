@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   Clock,
@@ -24,6 +25,7 @@ const emptyAnalytics = {
 };
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation();
   const { data, loading, error, refetch } = useFetch(
     () => adminService.getAnalytics(),
     [],
@@ -36,14 +38,14 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Admin Overview</h1>
+        <h1 className="text-2xl font-bold">{t('pages.admin.overview')}</h1>
         {error && (
           <button
             type="button"
             className="text-sm font-medium text-green-700 underline"
             onClick={refetch}
           >
-            Retry
+            {t('common.retry')}
           </button>
         )}
       </div>
@@ -51,24 +53,24 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatsCard
-          title="Farmers"
+          title={t('pages.admin.farmers')}
           value={analytics.active_farmers.toLocaleString()}
           icon={Users}
         />
         <StatsCard
-          title="Buyers"
+          title={t('pages.admin.buyers')}
           value={analytics.active_buyers.toLocaleString()}
           icon={ShoppingBag}
           color="blue"
         />
         <StatsCard
-          title="GMV"
+          title={t('monthly_gmv')}
           value={formatCurrency(analytics.monthly_gmv)}
           icon={DollarSign}
           color="paddy"
         />
         <StatsCard
-          title="Disputes"
+          title={t('pages.admin.disputes')}
           value={analytics.open_disputes}
           icon={AlertCircle}
           color="red"
@@ -76,18 +78,22 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="card">
-        <h2 className="mb-4 font-semibold">Pending Approvals</h2>
+        <h2 className="mb-4 font-semibold">{t('pending_approvals')}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex items-center gap-3 rounded-lg bg-amber-50 p-3">
             <Clock className="h-5 w-5 text-amber-600" />
             <p className="text-sm font-medium text-amber-800">
-              {analytics.pending_verifications} accounts
+              {t('pages.admin.accounts_count', {
+                count: analytics.pending_verifications,
+              })}
             </p>
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-blue-50 p-3">
             <Clock className="h-5 w-5 text-blue-600" />
             <p className="text-sm font-medium text-blue-800">
-              {analytics.pending_products} listings
+              {t('pages.admin.listings_count', {
+                count: analytics.pending_products,
+              })}
             </p>
           </div>
         </div>

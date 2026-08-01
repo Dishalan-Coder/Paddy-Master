@@ -1,9 +1,11 @@
 """Tests for user profile update endpoints."""
 
 import pytest
+from botocore.exceptions import ClientError
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.services import s3_service
 
 
 async def register_user(client: AsyncClient, **overrides):
@@ -155,3 +157,70 @@ async def test_update_profile_rejects_invalid_district():
 
     assert response.status_code == 422
     assert "Select a valid district" in response.text
+
+
+@pytest.mark.asyncio
+async def test_upload_profile_photo_uses_local_storage(tmp_path, monkeypatch):
+    monkeypatch.setattr(s3_service, "UPLOAD_ROOT", tmp_path)
+    monkeypatch.setattr(s3_service.settings, "AWS_ACCESS_KEY_ID", "")
+    monkeypatch.setattr(s3_service.settings, "AWS_SECRET_ACCESS_KEY", "")
+    monkeypatch.setattr(s3_service.settings, "S3_BUCKET_NAME", "")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        registered = await register_user(client)
+
+        response = await client.post(
+            "/api/v1/users/me/photo",
+            headers={"Authorization": f"Bearer {registered['access_token']}"},
+            files={"image": ("profile.png", b"fake image bytes", "image/png")},
+        )
+
+        profile = await client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {registered['access_token']}"},
+        )
+
+    assert response.status_code == 200
+    image_url = response.json()["profile_image_url"]
+    assert image_url.startswith("/uploads/profiles/")
+    assert (tmp_path / image_url.removeprefix("/uploads/")).read_bytes() == (
+        b"fake image bytes"
+    )
+    assert profile.json()["profile_image_url"] == image_url
+
+
+@pytest.mark.asyncio
+async def test_upload_profile_photo_falls_back_to_local_when_s3_fails(
+    tmp_path, monkeypatch
+):
+    class BrokenS3Client:
+        def put_object(self, **_kwargs):
+            raise ClientError(
+                {"Error": {"Code": "NoSuchBucket", "Message": "Missing bucket"}},
+                "PutObject",
+            )
+
+    monkeypatch.setattr(s3_service, "UPLOAD_ROOT", tmp_path)
+    monkeypatch.setattr(s3_service.settings, "AWS_ACCESS_KEY_ID", "AKIA_TEST")
+    monkeypatch.setattr(s3_service.settings, "AWS_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setattr(s3_service.settings, "S3_BUCKET_NAME", "missing-bucket")
+    monkeypatch.setattr(s3_service, "get_s3_client", lambda: BrokenS3Client())
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        registered = await register_user(client)
+
+        response = await client.post(
+            "/api/v1/users/me/photo",
+            headers={"Authorization": f"Bearer {registered['access_token']}"},
+            files={"image": ("profile.webp", b"webp image bytes", "image/webp")},
+        )
+
+    assert response.status_code == 200
+    image_url = response.json()["profile_image_url"]
+    assert image_url.startswith("/uploads/profiles/")
+    assert image_url.endswith(".webp")
+    assert (tmp_path / image_url.removeprefix("/uploads/")).read_bytes() == (
+        b"webp image bytes"
+    )

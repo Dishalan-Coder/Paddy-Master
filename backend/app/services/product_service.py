@@ -6,15 +6,49 @@ from typing import Any, Dict, List, Optional
 from pymongo import ReturnDocument
 
 from app.db.mongodb import get_database_or_raise
-from app.models.product import ProductCreate, ProductStatus, ProductUpdate
+from app.models.product import (
+    ProductCreate,
+    ProductStatus,
+    ProductUpdate,
+    SUPPORTED_PRICE_UNITS_KG,
+)
 from app.services.s3_service import resolve_file_url
 from app.utils.mongo import object_id_or_none, serialize_document
 
-ALLOWED_SORT_FIELDS = {"created_at", "price_per_kg", "quantity_kg", "variety", "views"}
+DEFAULT_PRODUCT_PRICE_UNIT_KG = 72
+ALLOWED_SORT_FIELDS = {
+    "created_at",
+    "price_per_kg",
+    "unit_price_per_kg",
+    "quantity_kg",
+    "variety",
+    "views",
+}
+
+
+def resolve_product_pricing(product: dict) -> tuple[int, float, float]:
+    raw_unit = product.get("price_unit_kg")
+    try:
+        unit = int(raw_unit or DEFAULT_PRODUCT_PRICE_UNIT_KG)
+    except (TypeError, ValueError):
+        unit = DEFAULT_PRODUCT_PRICE_UNIT_KG
+    unit_was_saved = raw_unit is not None and unit in SUPPORTED_PRICE_UNITS_KG
+    if not unit_was_saved:
+        unit = DEFAULT_PRODUCT_PRICE_UNIT_KG
+
+    price = float(product.get("price_per_kg") or 0)
+    if not unit_was_saved:
+        price = price * unit
+
+    return unit, round(price, 2), round(price / unit, 4) if unit else 0.0
 
 
 def _present_product(product: dict) -> dict:
     product = dict(product)
+    unit, unit_price, unit_price_per_kg = resolve_product_pricing(product)
+    product["price_unit_kg"] = unit
+    product["price_per_kg"] = unit_price
+    product["unit_price_per_kg"] = unit_price_per_kg
     product["image_urls"] = [
         url
         for url in (resolve_file_url(value) for value in product.get("image_urls", []))
@@ -27,6 +61,10 @@ async def create_product(farmer_id, data: ProductCreate) -> dict:
     db = get_database_or_raise()
     now = datetime.now(timezone.utc)
     doc = data.model_dump(mode="json")
+    unit, unit_price, unit_price_per_kg = resolve_product_pricing(doc)
+    doc["price_unit_kg"] = unit
+    doc["price_per_kg"] = unit_price
+    doc["unit_price_per_kg"] = unit_price_per_kg
     doc.update(
         {
             "farmer_id": farmer_id,
@@ -75,15 +113,17 @@ async def get_all_products(
     if district:
         query["district"] = {"$regex": district.strip(), "$options": "i"}
     if min_price is not None or max_price is not None:
-        query["price_per_kg"] = {}
+        query["unit_price_per_kg"] = {}
         if min_price is not None:
-            query["price_per_kg"]["$gte"] = min_price
+            query["unit_price_per_kg"]["$gte"] = min_price
         if max_price is not None:
-            query["price_per_kg"]["$lte"] = max_price
+            query["unit_price_per_kg"]["$lte"] = max_price
     if is_organic is not None:
         query["is_organic"] = is_organic
 
     sort_field = sort_by if sort_by in ALLOWED_SORT_FIELDS else "created_at"
+    if sort_field == "price_per_kg":
+        sort_field = "unit_price_per_kg"
     direction = 1 if sort_order == 1 else -1
     total = await db.products.count_documents(query)
     products = (
@@ -169,6 +209,20 @@ async def update_product(
     if not update_data:
         product = await db.products.find_one({"_id": oid, "farmer_id": farmer_id})
         return serialize_document(_present_product(product)) if product else None
+
+    if "price_per_kg" in update_data or "price_unit_kg" in update_data:
+        existing = await db.products.find_one({"_id": oid, "farmer_id": farmer_id})
+        if not existing:
+            return None
+        pricing_doc = {**existing, **update_data}
+        if "price_per_kg" in update_data and "price_unit_kg" not in update_data:
+            pricing_doc["price_unit_kg"] = (
+                existing.get("price_unit_kg") or DEFAULT_PRODUCT_PRICE_UNIT_KG
+            )
+        unit, unit_price, unit_price_per_kg = resolve_product_pricing(pricing_doc)
+        update_data["price_unit_kg"] = unit
+        update_data["price_per_kg"] = unit_price
+        update_data["unit_price_per_kg"] = unit_price_per_kg
 
     update_data["updated_at"] = datetime.now(timezone.utc)
     result = await db.products.find_one_and_update(

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import { DISTRICTS, SOIL_TYPES } from '../../utils/constants';
 import { fieldClass, hasErrors, toPositiveNumber } from '../../utils/forms';
 import { getNameValidationError } from '../../utils/validators';
+import { formatDistrict, formatSoilType } from '../../utils/formatters';
 
 const INITIAL_FORM = {
   name: '',
@@ -22,6 +24,7 @@ const getFormValues = (farm = {}) => ({
 });
 
 export default function FarmForm({ initialData, onSubmit, loading }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
@@ -35,7 +38,10 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({
       ...current,
-      [name]: name === 'name' ? getNameValidationError(value, 'Farm name') : '',
+      [name]:
+        name === 'name'
+          ? getNameValidationError(value, t('forms.farm_name'))
+          : '',
     }));
     setError('');
   };
@@ -45,32 +51,51 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
     const area = toPositiveNumber(form.area_acres);
 
     if (!form.name.trim()) {
-      next.name = 'Farm name is required.';
+      next.name = t('validation.required', { field: t('forms.farm_name') });
     } else {
-      const nameError = getNameValidationError(form.name, 'Farm name');
+      const nameError = getNameValidationError(
+        form.name,
+        t('forms.farm_name'),
+      );
       if (nameError) {
         next.name = nameError;
       } else if (form.name.trim().length < 2) {
-        next.name = 'Farm name must be at least 2 characters.';
+        next.name = t('validation.min_chars', {
+          field: t('forms.farm_name'),
+          count: 2,
+        });
       }
     }
 
     if (!next.name && form.name.trim().length > 100) {
-      next.name = 'Farm name must be 100 characters or less.';
+      next.name = t('validation.max_chars', {
+        field: t('forms.farm_name'),
+        count: 100,
+      });
     }
 
     if (!form.location.trim()) {
-      next.location = 'Location is required.';
+      next.location = t('validation.required', {
+        field: t('forms.location'),
+      });
     } else if (form.location.trim().length < 2) {
-      next.location = 'Location must be at least 2 characters.';
+      next.location = t('validation.min_chars', {
+        field: t('forms.location'),
+        count: 2,
+      });
     } else if (form.location.trim().length > 200) {
-      next.location = 'Location must be 200 characters or less.';
+      next.location = t('validation.max_chars', {
+        field: t('forms.location'),
+        count: 200,
+      });
     }
 
     if (!form.area_acres) {
-      next.area_acres = 'Area is required.';
+      next.area_acres = t('validation.required', { field: t('common.area') });
     } else if (!area) {
-      next.area_acres = 'Area must be greater than zero.';
+      next.area_acres = t('validation.positive', {
+        field: t('common.area'),
+      });
     }
 
     return next;
@@ -109,7 +134,7 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
       <ErrorAlert message={error} onDismiss={() => setError('')} />
       <div>
         <label htmlFor="farm_name" className="label">
-          Farm name
+          {t('forms.farm_name')}
         </label>
         <input
           id="farm_name"
@@ -125,7 +150,7 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
       </div>
       <div>
         <label htmlFor="farm_location" className="label">
-          Location
+          {t('forms.location')}
         </label>
         <input
           id="farm_location"
@@ -134,7 +159,7 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
           onChange={change}
           className={fieldClass(errors, 'location')}
           maxLength={200}
-          placeholder="Village, town, or landmark"
+          placeholder={t('forms.village_placeholder')}
           aria-invalid={Boolean(errors.location)}
           aria-describedby={errors.location ? 'location-error' : undefined}
         />
@@ -143,7 +168,7 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="farm_area" className="label">
-            Area (acres)
+            {t('area_acres')}
           </label>
           <input
             id="farm_area"
@@ -164,7 +189,7 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
         </div>
         <div>
           <label htmlFor="farm_soil" className="label">
-            Soil type
+            {t('forms.soil_type')}
           </label>
           <select
             id="farm_soil"
@@ -173,16 +198,18 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
             onChange={change}
             className="input-field"
           >
-            <option value="">Select soil type</option>
+            <option value="">{t('forms.select_soil')}</option>
             {SOIL_TYPES.map((soilType) => (
-              <option key={soilType}>{soilType}</option>
+              <option key={soilType} value={soilType}>
+                {formatSoilType(soilType)}
+              </option>
             ))}
           </select>
         </div>
       </div>
       <div>
         <label htmlFor="farm_district" className="label">
-          District
+          {t('district')}
         </label>
         <select
           id="farm_district"
@@ -191,14 +218,16 @@ export default function FarmForm({ initialData, onSubmit, loading }) {
           onChange={change}
           className="input-field"
         >
-          <option value="">Select district</option>
+          <option value="">{t('forms.select_district')}</option>
           {DISTRICTS.map((district) => (
-            <option key={district}>{district}</option>
+            <option key={district} value={district}>
+              {formatDistrict(district)}
+            </option>
           ))}
         </select>
       </div>
       <Button type="submit" loading={loading}>
-        Save farm
+        {t('forms.save_farm')}
       </Button>
     </form>
   );

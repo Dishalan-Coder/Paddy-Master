@@ -1,10 +1,9 @@
 import { Component } from 'react';
 import ErrorPage from '../../pages/ErrorPage';
-
-const isDynamicImportError = (error) =>
-  /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i.test(
-    error?.message || '',
-  );
+import {
+  isDynamicImportError,
+  recoverDynamicImportError,
+} from '../../utils/dynamicImport';
 
 export default class AppErrorBoundary extends Component {
   state = { error: null };
@@ -15,6 +14,7 @@ export default class AppErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     console.error(error, info);
+    recoverDynamicImportError(error);
   }
 
   resetError = () => {

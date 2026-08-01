@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import chatService from '../../services/chatService';
 import { formatDateTime } from '../../utils/formatters';
 export default function ChatBox({ receiverId, conversationId, onClose }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [msgs, setMsgs] = useState([]);
   const [text, setText] = useState('');
@@ -35,14 +37,16 @@ export default function ChatBox({ receiverId, conversationId, onClose }) {
   return (
     <div className="fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] h-[500px] bg-white rounded-2xl shadow-2xl border flex flex-col z-50 animate-fadeIn">
       <div className="flex items-center justify-between px-4 py-3 border-b">
-        <h4 className="font-semibold">Chat</h4>
+        <h4 className="font-semibold">{t('chat.title')}</h4>
         <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
           <X className="w-4 h-4" />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgs.length === 0 && (
-          <p className="text-center text-gray-400 text-sm py-8">No messages.</p>
+          <p className="text-center text-gray-400 text-sm py-8">
+            {t('chat.empty')}
+          </p>
         )}
         {msgs.map((m) => {
           const mine = m.sender_id === user.id;
@@ -70,7 +74,7 @@ export default function ChatBox({ receiverId, conversationId, onClose }) {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type..."
+          placeholder={t('chat.placeholder')}
           className="flex-1 text-sm outline-none bg-gray-50 rounded-lg px-3 py-2"
         />
         <button

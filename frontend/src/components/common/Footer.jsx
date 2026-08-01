@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ShieldCheck } from 'lucide-react';
@@ -6,6 +7,8 @@ import BrandLogo from './BrandLogo';
 const year = new Date().getFullYear();
 
 export default function Footer({ variant = 'public', className = '' }) {
+  const { t } = useTranslation();
+
   if (variant === 'app') {
     return (
       <footer
@@ -19,11 +22,11 @@ export default function Footer({ variant = 'public', className = '' }) {
             <BrandLogo size="xs" />
           </Link>
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
-            <span>Smart farm records</span>
-            <span>Marketplace orders</span>
-            <span>Weather and prices</span>
+            <span>{t('landing.capabilities.records_title')}</span>
+            <span>{t('common.active_orders')}</span>
+            <span>{t('dashboard_pages.prices_weather')}</span>
           </div>
-          <p className="text-xs">&copy; {year} Paddy Master</p>
+          <p className="text-xs">&copy; {year} {t('app_name')}</p>
         </div>
       </footer>
     );
@@ -37,7 +40,7 @@ export default function Footer({ variant = 'public', className = '' }) {
           className,
         )}
       >
-        <p>&copy; {year} Paddy Master. Smart farm and marketplace system.</p>
+        <p>&copy; {year} {t('app_name')}. {t('landing.platform_title')}</p>
       </footer>
     );
   }
@@ -50,28 +53,27 @@ export default function Footer({ variant = 'public', className = '' }) {
             <BrandLogo size="sm" />
           </Link>
           <p className="mt-4 max-w-xl leading-6">
-            Crop records, weather intelligence, marketplace orders, payments,
-            and admin controls for a more transparent paddy workflow.
+            {t('landing.hero_copy')}
           </p>
         </div>
         <div className="flex flex-col gap-4 lg:items-end">
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold text-slate-600">
             <a href="#features" className="hover:text-emerald-700">
-              Features
+              {t('landing.nav_platform')}
             </a>
             <a href="#roles" className="hover:text-emerald-700">
-              For everyone
+              {t('landing.nav_roles')}
             </a>
             <a href="#workflow" className="hover:text-emerald-700">
-              How it works
+              {t('landing.nav_workflow')}
             </a>
             <Link to="/login" className="hover:text-emerald-700">
-              Log in
+              {t('login')}
             </Link>
           </nav>
           <p className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400">
             <ShieldCheck className="h-4 w-4 text-emerald-700" />
-            &copy; {year} Paddy Master. Secure farm and market operations.
+            &copy; {year} {t('app_name')}. {t('landing.hero_badge')}.
           </p>
         </div>
       </div>

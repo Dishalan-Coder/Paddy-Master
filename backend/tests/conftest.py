@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 from bson import ObjectId
+from pymongo import ReturnDocument
 
 from app.db import mongodb
 
@@ -33,6 +34,15 @@ class FakeCollection:
         self.documents = []
 
     @staticmethod
+    def _get_value(document, key):
+        current = document
+        for part in key.split("."):
+            if not isinstance(current, dict) or part not in current:
+                return None
+            current = current[part]
+        return current
+
+    @staticmethod
     def _matches(document, query):
         for key, expected in query.items():
             if key == "$or":
@@ -40,10 +50,28 @@ class FakeCollection:
                     FakeCollection._matches(document, option) for option in expected
                 ):
                     return False
-            elif isinstance(expected, dict) and "$ne" in expected:
-                if document.get(key) == expected["$ne"]:
+            elif isinstance(expected, dict):
+                actual = FakeCollection._get_value(document, key)
+                supported = {"$ne", "$gte", "$lte", "$in", "$exists"}
+                if any(operator not in supported for operator in expected):
                     return False
-            elif document.get(key) != expected:
+                if "$ne" in expected and actual == expected["$ne"]:
+                    return False
+                if "$exists" in expected:
+                    exists = FakeCollection._get_value(document, key) is not None
+                    if exists != bool(expected["$exists"]):
+                        return False
+                if "$in" in expected and actual not in expected["$in"]:
+                    return False
+                if "$gte" in expected and (
+                    actual is None or actual < expected["$gte"]
+                ):
+                    return False
+                if "$lte" in expected and (
+                    actual is None or actual > expected["$lte"]
+                ):
+                    return False
+            elif FakeCollection._get_value(document, key) != expected:
                 return False
         return True
 
@@ -74,25 +102,43 @@ class FakeCollection:
     async def find_one_and_update(self, query, update, **_kwargs):
         for index, document in enumerate(self.documents):
             if self._matches(document, query):
+                before = deepcopy(document)
                 stored = deepcopy(document)
+                if "$inc" in update:
+                    for key, amount in update["$inc"].items():
+                        stored[key] = stored.get(key, 0) + amount
                 if "$set" in update:
                     stored.update(deepcopy(update["$set"]))
                 self.documents[index] = stored
+                if _kwargs.get("return_document") == ReturnDocument.BEFORE:
+                    return before
                 return deepcopy(stored)
         return None
 
-    async def update_one(self, query, update, **_kwargs):
+    async def update_one(self, query, update, **kwargs):
         matched = 0
         modified = 0
         for index, document in enumerate(self.documents):
             if self._matches(document, query):
                 matched = 1
                 stored = deepcopy(document)
+                if "$inc" in update:
+                    for key, amount in update["$inc"].items():
+                        stored[key] = stored.get(key, 0) + amount
+                    modified = 1
                 if "$set" in update:
                     stored.update(deepcopy(update["$set"]))
                     modified = 1
                 self.documents[index] = stored
                 break
+        if not matched and kwargs.get("upsert"):
+            stored = deepcopy(query)
+            if "$set" in update:
+                stored.update(deepcopy(update["$set"]))
+            stored["_id"] = ObjectId()
+            self.documents.append(stored)
+            matched = 1
+            modified = 1
         return SimpleNamespace(matched_count=matched, modified_count=modified)
 
     async def count_documents(self, query):

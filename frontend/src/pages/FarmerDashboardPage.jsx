@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
   ArrowRight,
@@ -16,13 +17,19 @@ import RecommendationList from '../components/recommendations/RecommendationList
 import Loader from '../components/common/Loader';
 import useFetch from '../hooks/useFetch';
 import { useAuth } from '../context/AuthContext';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import {
+  formatCurrency,
+  formatDate,
+  formatGrowthStage,
+  formatWeatherAlertType,
+} from '../utils/formatters';
 import dashboardService from '../services/dashboardService';
 import cropService from '../services/cropService';
 import weatherService from '../services/weatherService';
 import recommendationService from '../services/recommendationService';
 
 export default function FarmerDashboardPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: dashboard, loading: dashboardLoading } = useFetch(
     () => dashboardService.getFarmerData(),
@@ -50,14 +57,15 @@ export default function FarmerDashboardPage() {
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-lime-300">
-              Farmer command centre
+              {t('dashboard_pages.farmer_kicker')}
             </p>
             <h1 className="mt-2 font-display text-3xl font-black sm:text-4xl">
-              Good day, {user?.full_name?.split(' ')[0]}
+              {t('dashboard_pages.farmer_greeting', {
+                name: user?.full_name?.split(' ')[0] || '',
+              })}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-100">
-              Track the field, act on alerts, prepare harvests, and manage
-              direct buyer orders from one dashboard.
+              {t('dashboard_pages.farmer_copy')}
             </p>
           </div>
           <div className="flex gap-3">
@@ -65,13 +73,13 @@ export default function FarmerDashboardPage() {
               to="/crops/new"
               className="rounded-xl bg-white px-4 py-2.5 text-sm font-black text-emerald-900"
             >
-              Add crop
+              {t('add_crop')}
             </Link>
             <Link
               to="/products/new"
               className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-black text-white"
             >
-              List harvest
+              {t('dashboard_pages.list_harvest')}
             </Link>
           </div>
         </div>
@@ -80,7 +88,9 @@ export default function FarmerDashboardPage() {
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
             <div>
               <p className="text-sm font-black">
-                {firstAlert.type?.replace('_', ' ').toUpperCase()} ALERT
+                {t('dashboard_pages.alert_label', {
+                  type: formatWeatherAlertType(firstAlert.type).toUpperCase(),
+                })}
               </p>
               <p className="mt-1 text-sm text-amber-50">{firstAlert.message}</p>
             </div>
@@ -90,24 +100,24 @@ export default function FarmerDashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatsCard
-          title="Active crops"
+          title={t('dashboard_pages.active_crops')}
           value={dashboard?.active_crops || 0}
           icon={Sprout}
         />
         <StatsCard
-          title="Live listings"
+          title={t('dashboard_pages.live_listings')}
           value={dashboard?.active_products || 0}
           icon={Package}
           color="blue"
         />
         <StatsCard
-          title="Pending orders"
+          title={t('dashboard_pages.pending_orders')}
           value={dashboard?.pending_orders || 0}
           icon={ShoppingCart}
           color="amber"
         />
         <StatsCard
-          title="Wallet balance"
+          title={t('wallet_balance')}
           value={formatCurrency(dashboard?.wallet_balance || 0)}
           icon={Wallet}
           color="paddy"
@@ -119,14 +129,16 @@ export default function FarmerDashboardPage() {
           <section className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="page-kicker">Current season</p>
-                <h2 className="text-xl font-black">Crop progress</h2>
+                <p className="page-kicker">{t('dashboard_pages.current_season')}</p>
+                <h2 className="text-xl font-black">
+                  {t('dashboard_pages.crop_progress')}
+                </h2>
               </div>
               <Link
                 to="/crops"
                 className="inline-flex items-center gap-1 text-sm font-black text-emerald-700"
               >
-                View all <ArrowRight className="h-4 w-4" />
+                {t('common.view_all')} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             {cropsLoading ? (
@@ -138,7 +150,7 @@ export default function FarmerDashboardPage() {
                 ))}
                 {!crops?.length && (
                   <div className="col-span-full rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400">
-                    No crop records yet.
+                    {t('pages.crops.none_records')}
                   </div>
                 )}
               </div>
@@ -149,7 +161,7 @@ export default function FarmerDashboardPage() {
             <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
               <CircleDollarSign className="h-5 w-5 text-emerald-700" />
               <p className="mt-4 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Total revenue
+                {t('dashboard_pages.total_revenue')}
               </p>
               <p className="mt-1 text-2xl font-black">
                 {formatCurrency(dashboard?.total_revenue || 0)}
@@ -158,7 +170,7 @@ export default function FarmerDashboardPage() {
             <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
               <Wallet className="h-5 w-5 text-amber-600" />
               <p className="mt-4 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Recorded expenses
+                {t('dashboard_pages.recorded_expenses')}
               </p>
               <p className="mt-1 text-2xl font-black">
                 {formatCurrency(dashboard?.total_expenses || 0)}
@@ -167,7 +179,7 @@ export default function FarmerDashboardPage() {
             <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
               <Sprout className="h-5 w-5 text-lime-300" />
               <p className="mt-4 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Net position
+                {t('dashboard_pages.net_position')}
               </p>
               <p
                 className={`mt-1 text-2xl font-black ${(dashboard?.net_profit || 0) >= 0 ? 'text-lime-300' : 'text-red-300'}`}
@@ -181,7 +193,9 @@ export default function FarmerDashboardPage() {
             <section className="rounded-[1.5rem] border border-slate-200 bg-white p-6">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-5 w-5 text-emerald-700" />
-                <h2 className="font-black">Upcoming harvests</h2>
+                <h2 className="font-black">
+                  {t('dashboard_pages.upcoming_harvests')}
+                </h2>
               </div>
               <div className="mt-4 divide-y divide-slate-100">
                 {dashboard.upcoming_harvests.map((crop) => (
@@ -192,7 +206,7 @@ export default function FarmerDashboardPage() {
                     <div>
                       <p className="font-bold">{crop.variety}</p>
                       <p className="text-xs text-slate-400 capitalize">
-                        {crop.growth_stage?.replace('_', ' ')}
+                        {formatGrowthStage(crop.growth_stage)}
                       </p>
                     </div>
                     <p className="text-sm font-black text-emerald-700">
@@ -209,12 +223,12 @@ export default function FarmerDashboardPage() {
           {weather && <WeatherCard data={weather} />}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-black">Smart recommendations</h2>
+              <h2 className="text-lg font-black">{t('recommendations')}</h2>
               <Link
                 to="/recommendations"
                 className="text-xs font-black text-emerald-700"
               >
-                View all
+                {t('common.view_all')}
               </Link>
             </div>
             <RecommendationList

@@ -1,38 +1,51 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import RouteLoadingFallback from '../components/common/RouteLoadingFallback';
 import ErrorPage from '../pages/ErrorPage';
 import LoadingPage from '../pages/LoadingPage';
 import NetworkSlowPage from '../pages/NetworkSlowPage';
+import { lazyWithRetry } from '../utils/dynamicImport';
 import ProtectedRoute from './ProtectedRoute';
 
-const AuthLayout = lazy(() => import('../layouts/AuthLayout'));
-const MainLayout = lazy(() => import('../layouts/MainLayout'));
-const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
-const LandingPage = lazy(() => import('../pages/LandingPage'));
-const LoginPage = lazy(() => import('../pages/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/RegisterPage'));
-const DashboardPage = lazy(() => import('../pages/DashboardPage'));
-const FarmsPage = lazy(() => import('../pages/FarmsPage'));
-const AddFarmPage = lazy(() => import('../pages/AddFarmPage'));
-const AddCropPage = lazy(() => import('../pages/AddCropPage'));
-const CropsPage = lazy(() => import('../pages/CropsPage'));
-const ExpensesPage = lazy(() => import('../pages/ExpensesPage'));
-const RecommendationsPage = lazy(() => import('../pages/RecommendationsPage'));
-const WeatherPricesPage = lazy(() => import('../pages/WeatherPricesPage'));
-const MarketplacePage = lazy(() => import('../pages/MarketplacePage'));
-const ProductDetailsPage = lazy(() => import('../pages/ProductDetailsPage'));
-const AddProductPage = lazy(() => import('../pages/AddProductPage'));
-const OrdersPage = lazy(() => import('../pages/OrdersPage'));
-const BillingPage = lazy(() => import('../pages/BillingPage'));
-const ProfilePage = lazy(() => import('../pages/ProfilePage'));
-const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
-const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
-const AdminUsersPage = lazy(() => import('../pages/AdminUsersPage'));
-const AdminProductsPage = lazy(() => import('../pages/AdminProductsPage'));
-const AdminOrdersPage = lazy(() => import('../pages/AdminOrdersPage'));
-const AdminPricesPage = lazy(() => import('../pages/AdminPricesPage'));
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const AuthLayout = lazyWithRetry(() => import('../layouts/AuthLayout'));
+const MainLayout = lazyWithRetry(() => import('../layouts/MainLayout'));
+const AdminLayout = lazyWithRetry(() => import('../layouts/AdminLayout'));
+const LandingPage = lazyWithRetry(() => import('../pages/LandingPage'));
+const LoginPage = lazyWithRetry(() => import('../pages/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('../pages/RegisterPage'));
+const DashboardPage = lazyWithRetry(() => import('../pages/DashboardPage'));
+const FarmsPage = lazyWithRetry(() => import('../pages/FarmsPage'));
+const AddFarmPage = lazyWithRetry(() => import('../pages/AddFarmPage'));
+const AddCropPage = lazyWithRetry(() => import('../pages/AddCropPage'));
+const CropsPage = lazyWithRetry(() => import('../pages/CropsPage'));
+const ExpensesPage = lazyWithRetry(() => import('../pages/ExpensesPage'));
+const RecommendationsPage = lazyWithRetry(() =>
+  import('../pages/RecommendationsPage'),
+);
+const WeatherPricesPage = lazyWithRetry(() =>
+  import('../pages/WeatherPricesPage'),
+);
+const MarketplacePage = lazyWithRetry(() => import('../pages/MarketplacePage'));
+const ProductDetailsPage = lazyWithRetry(() =>
+  import('../pages/ProductDetailsPage'),
+);
+const AddProductPage = lazyWithRetry(() => import('../pages/AddProductPage'));
+const OrdersPage = lazyWithRetry(() => import('../pages/OrdersPage'));
+const BillingPage = lazyWithRetry(() => import('../pages/BillingPage'));
+const ProfilePage = lazyWithRetry(() => import('../pages/ProfilePage'));
+const NotificationsPage = lazyWithRetry(() =>
+  import('../pages/NotificationsPage'),
+);
+const AdminDashboardPage = lazyWithRetry(() =>
+  import('../pages/AdminDashboardPage'),
+);
+const AdminUsersPage = lazyWithRetry(() => import('../pages/AdminUsersPage'));
+const AdminProductsPage = lazyWithRetry(() =>
+  import('../pages/AdminProductsPage'),
+);
+const AdminOrdersPage = lazyWithRetry(() => import('../pages/AdminOrdersPage'));
+const AdminPricesPage = lazyWithRetry(() => import('../pages/AdminPricesPage'));
+const NotFoundPage = lazyWithRetry(() => import('../pages/NotFoundPage'));
 
 const farmerOnly = (element) => (
   <ProtectedRoute roles={['farmer']}>{element}</ProtectedRoute>

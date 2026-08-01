@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowLeft, RefreshCcw } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import Button from './Button';
+import LanguageToggle from './LanguageToggle';
 
 const toneClasses = {
   emerald: {
@@ -33,11 +35,12 @@ export default function StatusPage({
   primaryHref,
   primaryLabel,
   secondaryHref = '/',
-  secondaryLabel = 'Back to home',
+  secondaryLabel,
   showSpinner = false,
   tone = 'emerald',
   title,
 }) {
+  const { t } = useTranslation();
   const palette = toneClasses[tone] || toneClasses.emerald;
 
   return (
@@ -49,6 +52,7 @@ export default function StatusPage({
         <Link to="/" className="inline-flex items-center hover:opacity-90">
           <BrandLogo size="sm" />
         </Link>
+        <LanguageToggle compact />
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-5 py-10">
@@ -102,7 +106,7 @@ export default function StatusPage({
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               {onRetry ? (
                 <Button type="button" onClick={onRetry} icon={RefreshCcw}>
-                  {primaryLabel || 'Try again'}
+                  {primaryLabel || t('common.try_again')}
                 </Button>
               ) : primaryHref ? (
                 <Link to={primaryHref} className="btn-primary">
@@ -115,7 +119,7 @@ export default function StatusPage({
                   className="btn-secondary inline-flex items-center justify-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  {secondaryLabel}
+                  {secondaryLabel || t('common.back_to_home')}
                 </Link>
               ) : null}
             </div>

@@ -9,6 +9,12 @@ i18n
   .init({
     resources: { en: { translation: en }, ta: { translation: ta } },
     fallbackLng: 'en',
+    supportedLngs: ['en', 'ta'],
+    load: 'languageOnly',
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+    },
     interpolation: { escapeValue: false },
   });
 export default i18n;

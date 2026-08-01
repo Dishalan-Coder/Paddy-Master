@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WifiOff } from 'lucide-react';
 import StatusPage from '../components/common/StatusPage';
 
@@ -15,13 +16,14 @@ const getNetworkSnapshot = () => {
   };
 };
 
-const formatConnectionType = (effectiveType) =>
-  effectiveType ? effectiveType.toUpperCase() : 'Not reported';
+const formatConnectionType = (effectiveType, fallback) =>
+  effectiveType ? effectiveType.toUpperCase() : fallback;
 
-const formatDownlink = (downlink) =>
-  typeof downlink === 'number' ? `${downlink.toFixed(1)} Mbps` : 'Not reported';
+const formatDownlink = (downlink, fallback) =>
+  typeof downlink === 'number' ? `${downlink.toFixed(1)} Mbps` : fallback;
 
 export default function NetworkSlowPage({ actions = true }) {
+  const { t } = useTranslation();
   const [network, setNetwork] = useState(getNetworkSnapshot);
 
   useEffect(() => {
@@ -41,14 +43,25 @@ export default function NetworkSlowPage({ actions = true }) {
 
   const details = useMemo(
     () => [
-      { label: 'Connection', value: network.online ? 'Online' : 'Offline' },
       {
-        label: 'Network type',
-        value: formatConnectionType(network.effectiveType),
+        label: t('status_pages.connection'),
+        value: network.online
+          ? t('status_pages.online')
+          : t('status_pages.offline'),
       },
-      { label: 'Speed estimate', value: formatDownlink(network.downlink) },
+      {
+        label: t('status_pages.network_type'),
+        value: formatConnectionType(
+          network.effectiveType,
+          t('common.not_reported'),
+        ),
+      },
+      {
+        label: t('status_pages.speed_estimate'),
+        value: formatDownlink(network.downlink, t('common.not_reported')),
+      },
     ],
-    [network],
+    [network, t],
   );
 
   return (
@@ -56,18 +69,24 @@ export default function NetworkSlowPage({ actions = true }) {
       actions={actions}
       description={
         network.online
-          ? 'Your connection is responding slowly. Keep this page open, retry once the signal improves, or return home and continue with lighter pages.'
-          : 'Your device appears to be offline. Reconnect to the internet, then retry the page.'
+          ? t('status_pages.slow_description')
+          : t('status_pages.offline_description')
       }
       details={details}
-      eyebrow={network.online ? 'Slow network' : 'Offline'}
+      eyebrow={
+        network.online
+          ? t('status_pages.slow_eyebrow')
+          : t('status_pages.offline_eyebrow')
+      }
       icon={WifiOff}
       onRetry={() => window.location.reload()}
-      primaryLabel="Retry connection"
+      primaryLabel={t('common.retry_connection')}
       secondaryHref="/"
       tone="amber"
       title={
-        network.online ? 'The network is taking longer' : 'No connection found'
+        network.online
+          ? t('status_pages.slow_title')
+          : t('status_pages.offline_title')
       }
     />
   );

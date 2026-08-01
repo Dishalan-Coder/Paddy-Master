@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../common/Button';
 import ErrorAlert from '../common/ErrorAlert';
 import { EXPENSE_CATEGORIES } from '../../utils/constants';
 import { fieldClass, hasErrors, toPositiveNumber } from '../../utils/forms';
+import { formatExpenseCategory } from '../../utils/formatters';
 
 const INITIAL_FORM = {
   crop_id: '',
@@ -12,9 +14,6 @@ const INITIAL_FORM = {
   expense_date: '',
 };
 
-const labelCategory = (category) =>
-  category.charAt(0).toUpperCase() + category.slice(1);
-
 export default function ExpenseForm({
   cropOptions,
   onSubmit,
@@ -22,6 +21,7 @@ export default function ExpenseForm({
   serverError,
   onDismissServerError,
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
@@ -39,13 +39,23 @@ export default function ExpenseForm({
     const amount = toPositiveNumber(form.amount);
     const description = form.description.trim();
 
-    if (!form.category) next.category = 'Category is required.';
-    if (!form.amount) next.amount = 'Amount is required.';
-    else if (!amount) next.amount = 'Amount must be greater than zero.';
-    if (!description) next.description = 'Description is required.';
+    if (!form.category)
+      next.category = t('validation.required', { field: t('common.category') });
+    if (!form.amount)
+      next.amount = t('validation.required', { field: t('common.amount') });
+    else if (!amount)
+      next.amount = t('validation.positive', { field: t('common.amount') });
+    if (!description)
+      next.description = t('validation.required', {
+        field: t('description'),
+      });
     else if (description.length > 200)
-      next.description = 'Description must be 200 characters or less.';
-    if (!form.expense_date) next.expense_date = 'Expense date is required.';
+      next.description = t('validation.max_chars', {
+        field: t('description'),
+        count: 200,
+      });
+    if (!form.expense_date)
+      next.expense_date = t('validation.required', { field: t('common.date') });
 
     return next;
   };
@@ -91,7 +101,7 @@ export default function ExpenseForm({
       {cropOptions?.length > 0 && (
         <div>
           <label htmlFor="expense_crop" className="label">
-            Crop
+            {t('farm')}
           </label>
           <select
             id="expense_crop"
@@ -100,7 +110,7 @@ export default function ExpenseForm({
             onChange={change}
             className="input-field"
           >
-            <option value="">General farm expense</option>
+            <option value="">{t('forms.general_farm_expense')}</option>
             {cropOptions.map((crop) => (
               <option key={crop._id} value={crop._id}>
                 {crop.variety}
@@ -112,7 +122,7 @@ export default function ExpenseForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="expense_category" className="label">
-            Category
+            {t('common.category')}
           </label>
           <select
             id="expense_category"
@@ -123,10 +133,10 @@ export default function ExpenseForm({
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? 'category-error' : undefined}
           >
-            <option value="">Select category</option>
+            <option value="">{t('forms.select_category')}</option>
             {EXPENSE_CATEGORIES.map((category) => (
               <option key={category} value={category}>
-                {labelCategory(category)}
+                {formatExpenseCategory(category)}
               </option>
             ))}
           </select>
@@ -134,7 +144,7 @@ export default function ExpenseForm({
         </div>
         <div>
           <label htmlFor="expense_amount" className="label">
-            Amount (Rs.)
+            {t('common.amount_rs')}
           </label>
           <input
             id="expense_amount"
@@ -154,7 +164,7 @@ export default function ExpenseForm({
       </div>
       <div>
         <label htmlFor="expense_description" className="label">
-          Description
+          {t('description')}
         </label>
         <input
           id="expense_description"
@@ -163,7 +173,7 @@ export default function ExpenseForm({
           onChange={change}
           className={fieldClass(errors, 'description')}
           maxLength={200}
-          placeholder="Fertilizer, labour, transport..."
+          placeholder={t('forms.expense_placeholder')}
           aria-invalid={Boolean(errors.description)}
           aria-describedby={
             errors.description ? 'description-error' : undefined
@@ -173,7 +183,7 @@ export default function ExpenseForm({
       </div>
       <div>
         <label htmlFor="expense_date" className="label">
-          Date
+          {t('common.date')}
         </label>
         <input
           id="expense_date"
@@ -190,7 +200,7 @@ export default function ExpenseForm({
         {fieldError('expense_date')}
       </div>
       <Button type="submit" loading={loading}>
-        Add expense
+        {t('pages.expenses.add_expense')}
       </Button>
     </form>
   );

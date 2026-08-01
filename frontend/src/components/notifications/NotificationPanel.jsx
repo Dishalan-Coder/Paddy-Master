@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   CheckCheck,
@@ -7,7 +8,11 @@ import {
   Sprout,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatDateTime } from '../../utils/formatters';
+import {
+  formatDateTime,
+  formatNotificationMessage,
+  formatNotificationTitle,
+} from '../../utils/formatters';
 
 const icons = {
   order: PackageCheck,
@@ -23,14 +28,17 @@ export default function NotificationPanel({
   onMarkRead,
   onMarkAll,
 }) {
+  const { t } = useTranslation();
   const items = data?.notifications || [];
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <div>
-          <p className="font-black text-slate-900">Notifications</p>
+          <p className="font-black text-slate-900">{t('notifications')}</p>
           <p className="text-xs text-slate-500">
-            {data?.unread_count || 0} unread
+            {t('pages.notifications.unread', {
+              count: data?.unread_count || 0,
+            })}
           </p>
         </div>
         {!!data?.unread_count && (
@@ -39,19 +47,20 @@ export default function NotificationPanel({
             onClick={onMarkAll}
             className="flex items-center gap-1 text-xs font-bold text-emerald-700"
           >
-            <CheckCheck className="h-4 w-4" /> Read all
+            <CheckCheck className="h-4 w-4" />{' '}
+            {t('pages.notifications.read_all')}
           </button>
         )}
       </div>
       <div className="max-h-[28rem] overflow-y-auto">
         {loading && (
           <p className="p-6 text-center text-sm text-slate-400">
-            Loading notifications…
+            {t('pages.notifications.loading')}
           </p>
         )}
         {!loading && !items.length && (
           <p className="p-8 text-center text-sm text-slate-400">
-            No notifications yet.
+            {t('pages.notifications.empty')}
           </p>
         )}
         {items.map((item) => {
@@ -68,14 +77,14 @@ export default function NotificationPanel({
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-black text-slate-800">
-                    {item.title}
+                    {formatNotificationTitle(item.title)}
                   </p>
                   {!item.is_read && (
                     <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
                   )}
                 </div>
                 <p className="mt-1 text-xs leading-5 text-slate-600">
-                  {item.message}
+                  {formatNotificationMessage(item.message)}
                 </p>
                 <p className="mt-1.5 text-[11px] text-slate-400">
                   {formatDateTime(item.created_at)}

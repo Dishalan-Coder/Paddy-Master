@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import {
   BadgeCheck,
@@ -13,45 +14,36 @@ import Button from '../components/common/Button';
 import ErrorAlert from '../components/common/ErrorAlert';
 import { useAuth } from '../context/AuthContext';
 import paymentService from '../services/paymentService';
-import { formatDate } from '../utils/formatters';
+import { formatDate, formatOrderStatus } from '../utils/formatters';
+import { getApiErrorMessage } from '../utils/forms';
 
 const ACTIVE_STATUSES = new Set(['active', 'trialing']);
 
 const PLANS = {
   farmer: {
     value: 'farmer_pro',
-    name: 'Farmer Pro',
-    price: 'Stripe monthly plan',
-    summary: 'Advanced tools for field operations and marketplace selling.',
+    nameKey: 'pages.billing.farmer_pro',
+    summaryKey: 'pages.billing.farmer_summary',
     highlights: [
-      'Crop planning and advisory workspace',
-      'Marketplace listing and order tools',
-      'Revenue and expense visibility',
+      'pages.billing.farmer_highlight_1',
+      'pages.billing.farmer_highlight_2',
+      'pages.billing.farmer_highlight_3',
     ],
   },
   buyer: {
     value: 'buyer_pro',
-    name: 'Buyer Pro',
-    price: 'Stripe monthly plan',
-    summary: 'Procurement tools for sourcing verified paddy supply.',
+    nameKey: 'pages.billing.buyer_pro',
+    summaryKey: 'pages.billing.buyer_summary',
     highlights: [
-      'Marketplace sourcing and order tracking',
-      'Regional price and weather intelligence',
-      'Supplier communication workflow',
+      'pages.billing.buyer_highlight_1',
+      'pages.billing.buyer_highlight_2',
+      'pages.billing.buyer_highlight_3',
     ],
   },
 };
 
-const getRequestErrorMessage = (requestError, fallback) => {
-  const detail = requestError?.response?.data?.detail;
-  if (typeof detail === 'string') return detail;
-  return fallback;
-};
-
-const formatStatus = (status = 'inactive') =>
-  status.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-
 export default function BillingPage() {
+  const { t } = useTranslation();
   const { user, refreshProfile } = useAuth();
   const [searchParams] = useSearchParams();
   const [subscription, setSubscription] = useState(null);
@@ -65,13 +57,13 @@ export default function BillingPage() {
 
   const notice = useMemo(() => {
     if (checkoutState === 'success') {
-      return 'Checkout completed. Subscription status updates after Stripe confirms the payment.';
+      return t('pages.billing.checkout_success');
     }
     if (checkoutState === 'cancelled') {
-      return 'Checkout was cancelled. No subscription changes were made.';
+      return t('pages.billing.checkout_cancelled');
     }
     return '';
-  }, [checkoutState]);
+  }, [checkoutState, t]);
 
   const loadSubscription = async () => {
     setLoading(true);
@@ -82,9 +74,9 @@ export default function BillingPage() {
       await refreshProfile();
     } catch (requestError) {
       setError(
-        getRequestErrorMessage(
+        getApiErrorMessage(
           requestError,
-          'Could not load subscription details.',
+          t('pages.billing.load_failed'),
         ),
       );
     } finally {
@@ -106,9 +98,9 @@ export default function BillingPage() {
       window.location.assign(session.url);
     } catch (requestError) {
       setError(
-        getRequestErrorMessage(
+        getApiErrorMessage(
           requestError,
-          'Could not start Stripe Checkout.',
+          t('pages.billing.checkout_failed'),
         ),
       );
       setAction('');
@@ -123,9 +115,9 @@ export default function BillingPage() {
       window.location.assign(session.url);
     } catch (requestError) {
       setError(
-        getRequestErrorMessage(
+        getApiErrorMessage(
           requestError,
-          'Could not open Stripe billing management.',
+          t('pages.billing.portal_failed'),
         ),
       );
       setAction('');
@@ -136,10 +128,10 @@ export default function BillingPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fadeIn">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="page-kicker">Billing</p>
-          <h1 className="page-title">Subscription</h1>
+          <p className="page-kicker">{t('billing')}</p>
+          <h1 className="page-title">{t('pages.billing.title')}</h1>
           <p className="page-copy">
-            Manage your Paddy Master plan and Stripe billing access.
+            {t('pages.billing.copy')}
           </p>
         </div>
         <Button
@@ -149,7 +141,7 @@ export default function BillingPage() {
           loading={loading}
         >
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
@@ -167,13 +159,19 @@ export default function BillingPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-emerald-700">
                 <Sparkles className="h-3.5 w-3.5" />
-                {plan.name}
+                {t(plan.nameKey)}
               </div>
               <h2 className="mt-4 text-2xl font-black text-slate-950">
-                {plan.price}
+                {t('pages.billing.stripe_plan')}
               </h2>
+              <p className="mt-3 text-3xl font-black text-emerald-700">
+                {t('pages.billing.monthly_price')}
+              </p>
+              <p className="mt-1 text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                {t('pages.billing.monthly_price_note')}
+              </p>
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                {plan.summary}
+                {t(plan.summaryKey)}
               </p>
             </div>
             <div
@@ -184,7 +182,7 @@ export default function BillingPage() {
               ) : (
                 <ShieldCheck className="h-4 w-4" />
               )}
-              {formatStatus(subscription?.status || 'inactive')}
+              {formatOrderStatus(subscription?.status || 'inactive')}
             </div>
           </div>
 
@@ -194,7 +192,7 @@ export default function BillingPage() {
                 key={highlight}
                 className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold leading-6 text-slate-600"
               >
-                {highlight}
+                {t(highlight)}
               </div>
             ))}
           </div>
@@ -207,7 +205,9 @@ export default function BillingPage() {
               disabled={isActive || loading}
             >
               <CreditCard className="h-4 w-4" />
-              {isActive ? 'Subscribed' : 'Start with Stripe'}
+              {isActive
+                ? t('pages.billing.subscribed')
+                : t('pages.billing.start_stripe')}
             </Button>
             <Button
               type="button"
@@ -217,33 +217,39 @@ export default function BillingPage() {
               disabled={!subscription?.stripe_customer_id || loading}
             >
               <ExternalLink className="h-4 w-4" />
-              Manage billing
+              {t('pages.billing.manage_billing')}
             </Button>
           </div>
         </div>
 
         <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-            Current subscription
+            {t('pages.billing.current_subscription')}
           </p>
           <div className="mt-5 space-y-4">
             <div>
-              <p className="text-sm font-semibold text-slate-500">Plan</p>
+              <p className="text-sm font-semibold text-slate-500">
+                {t('pages.billing.plan')}
+              </p>
               <p className="mt-1 text-lg font-black text-slate-950">
-                {subscription?.plan ? formatStatus(subscription.plan) : 'No plan'}
+                {subscription?.plan
+                  ? formatOrderStatus(subscription.plan)
+                  : t('pages.billing.no_plan')}
               </p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-500">Status</p>
+              <p className="text-sm font-semibold text-slate-500">
+                {t('common.status')}
+              </p>
               <p className="mt-1 text-lg font-black text-slate-950">
-                {formatStatus(subscription?.status || 'inactive')}
+                {formatOrderStatus(subscription?.status || 'inactive')}
               </p>
             </div>
             <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4">
               <CalendarClock className="mt-0.5 h-5 w-5 text-slate-400" />
               <div>
                 <p className="text-sm font-semibold text-slate-500">
-                  Current period ends
+                  {t('pages.billing.current_period_ends')}
                 </p>
                 <p className="mt-1 text-sm font-black text-slate-950">
                   {formatDate(subscription?.current_period_end)}
@@ -252,8 +258,7 @@ export default function BillingPage() {
             </div>
             {subscription?.cancel_at_period_end && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-700">
-                This subscription is set to cancel at the end of the billing
-                period.
+                {t('pages.billing.cancel_notice')}
               </div>
             )}
           </div>

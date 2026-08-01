@@ -1,18 +1,20 @@
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 export default function ProfitLossDisplay({ data }) {
+  const { t } = useTranslation();
   if (!data) return null;
   const isP = data.profit_loss >= 0;
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       <div className="card border-l-4 border-l-amber-500">
-        <p className="text-sm text-slate-500">Spent</p>
+        <p className="text-sm text-slate-500">{t('pages.expenses.spent')}</p>
         <p className="mt-1 text-xl font-bold text-amber-700">
           {formatCurrency(data.total_expenses)}
         </p>
       </div>
       <div className="card border-l-4 border-l-paddy-600">
-        <p className="text-sm text-slate-500">Earned</p>
+        <p className="text-sm text-slate-500">{t('pages.expenses.earned')}</p>
         <p className="mt-1 text-xl font-bold text-paddy-700">
           {formatCurrency(data.total_earnings)}
         </p>
@@ -20,7 +22,7 @@ export default function ProfitLossDisplay({ data }) {
       <div
         className={`card border-l-4 ${isP ? 'border-l-green-500' : 'border-l-red-500'}`}
       >
-        <p className="text-sm text-slate-500">Profit/Loss</p>
+        <p className="text-sm text-slate-500">{t('profit_loss')}</p>
         <div className="mt-1 flex items-center gap-2">
           {isP ? (
             <TrendingUp className="h-5 w-5 text-green-600" />

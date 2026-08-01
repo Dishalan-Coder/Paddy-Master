@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Optional
 import uuid
+import logging
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
@@ -12,6 +13,7 @@ from app.core.config import settings
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 UPLOAD_ROOT = BACKEND_DIR / "uploads"
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
+logger = logging.getLogger(__name__)
 
 
 def _extension(content_type: str) -> str:
@@ -31,6 +33,18 @@ def get_s3_client():
     )
 
 
+def _store_local_file(file_bytes: bytes, folder: str, filename: str) -> Optional[str]:
+    key = f"{folder}/{filename}"
+    destination = UPLOAD_ROOT / folder / filename
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(file_bytes)
+    except OSError:
+        logger.exception("Local file upload failed for %s", key)
+        return None
+    return f"local://{key}"
+
+
 def upload_file(
     file_bytes: bytes, folder: str, content_type: str = "image/jpeg"
 ) -> Optional[str]:
@@ -39,9 +53,9 @@ def upload_file(
 
     extension = _extension(content_type)
     filename = f"{uuid.uuid4().hex}{extension}"
-    key = f"{folder}/{filename}"
 
     if settings.s3_enabled:
+        key = f"{folder}/{filename}"
         try:
             get_s3_client().put_object(
                 Bucket=settings.S3_BUCKET_NAME,
@@ -50,13 +64,20 @@ def upload_file(
                 ContentType=content_type,
             )
             return f"s3://{key}"
-        except (ClientError, BotoCoreError):
-            return None
+        except ClientError as exc:
+            error = exc.response.get("Error", {})
+            logger.warning(
+                "S3 upload failed for %s with %s: %s; using local storage",
+                key,
+                error.get("Code", "Unknown"),
+                error.get("Message", str(exc)),
+            )
+        except BotoCoreError as exc:
+            logger.warning(
+                "S3 upload failed for %s with %s; using local storage", key, exc
+            )
 
-    destination = UPLOAD_ROOT / folder / filename
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_bytes(file_bytes)
-    return f"local://{key}"
+    return _store_local_file(file_bytes, folder, filename)
 
 
 def generate_presigned_url(key: str, expires_in: int = 3600) -> Optional[str]:

@@ -1,13 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { Calendar } from 'lucide-react';
 import { formatGrowthStage, daysUntil } from '../../utils/formatters';
 export default function CropCard({ crop, onEdit, onDelete }) {
+  const { t } = useTranslation();
   const days = daysUntil(crop.expected_harvest_date);
   return (
     <div className="card hover:shadow-md transition-shadow animate-fadeIn">
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-semibold text-gray-900">{crop.variety}</h3>
-          <p className="text-xs text-gray-400">{crop.area_acres} acres</p>
+          <p className="text-xs text-gray-400">
+            {crop.area_acres} {t('common.acres')}
+          </p>
         </div>
         <span className="badge-green">
           {formatGrowthStage(crop.growth_stage)}
@@ -17,7 +21,12 @@ export default function CropCard({ crop, onEdit, onDelete }) {
         <div className="flex items-center gap-2">
           <Calendar className="w-3.5 h-3.5 text-gray-400" />
           <span>
-            Harvest in <strong>{days > 0 ? `${days} days` : 'Overdue'}</strong>
+            {t('pages.crops.harvest_in')}{' '}
+            <strong>
+              {days > 0
+                ? `${days} ${t('days')}`
+                : t('common.overdue')}
+            </strong>
           </span>
         </div>
       </div>
@@ -27,13 +36,13 @@ export default function CropCard({ crop, onEdit, onDelete }) {
             onClick={() => onEdit(crop)}
             className="text-sm text-paddy-700 font-medium"
           >
-            Edit
+            {t('edit')}
           </button>
           <button
             onClick={() => onDelete(crop._id)}
             className="text-sm text-red-500 font-medium"
           >
-            Delete
+            {t('delete')}
           </button>
         </div>
       )}

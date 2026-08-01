@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, CreditCard, PackageCheck } from 'lucide-react';
 import useFetch from '../hooks/useFetch';
 import adminService from '../services/adminService';
@@ -10,9 +11,13 @@ import {
   formatCurrency,
   formatDateTime,
   formatOrderStatus,
+  formatPaymentMethod,
+  formatVariety,
 } from '../utils/formatters';
+import { getApiErrorMessage } from '../utils/forms';
 
 export default function AdminOrdersPage() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState('');
   const [actionError, setActionError] = useState('');
   const [confirming, setConfirming] = useState(null);
@@ -24,7 +29,7 @@ export default function AdminOrdersPage() {
   const orders = data?.orders || [];
 
   const confirmTransfer = async (orderId) => {
-    if (!window.confirm('Confirm that this bank transfer was received?'))
+    if (!window.confirm(t('pages.admin.confirm_transfer')))
       return;
     setConfirming(orderId);
     setActionError('');
@@ -33,8 +38,10 @@ export default function AdminOrdersPage() {
       await refetch();
     } catch (requestError) {
       setActionError(
-        requestError.response?.data?.detail ||
-          'Could not confirm the bank transfer.',
+        getApiErrorMessage(
+          requestError,
+          t('pages.admin.confirm_transfer_failed'),
+        ),
       );
     } finally {
       setConfirming(null);
@@ -45,10 +52,10 @@ export default function AdminOrdersPage() {
     <div className="space-y-6 animate-fadeIn">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="page-kicker">Marketplace supervision</p>
-          <h1 className="page-title">All orders</h1>
+          <p className="page-kicker">{t('pages.admin.all_orders_kicker')}</p>
+          <h1 className="page-title">{t('pages.admin.all_orders_title')}</h1>
           <p className="page-copy">
-            Review order progress, participants, and payment state.
+            {t('pages.admin.all_orders_copy')}
           </p>
         </div>
         <select
@@ -56,7 +63,7 @@ export default function AdminOrdersPage() {
           value={status}
           onChange={(event) => setStatus(event.target.value)}
         >
-          <option value="">All statuses</option>
+          <option value="">{t('common.all_statuses')}</option>
           {[
             'pending',
             'confirmed',
@@ -84,11 +91,11 @@ export default function AdminOrdersPage() {
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-5 py-4">Order</th>
-                  <th className="px-5 py-4">Farmer / buyer</th>
-                  <th className="px-5 py-4">Value</th>
-                  <th className="px-5 py-4">Payment</th>
-                  <th className="px-5 py-4">Status</th>
+                  <th className="px-5 py-4">{t('pages.admin.order')}</th>
+                  <th className="px-5 py-4">{t('pages.admin.farmer_buyer')}</th>
+                  <th className="px-5 py-4">{t('pages.admin.value')}</th>
+                  <th className="px-5 py-4">{t('common.payment')}</th>
+                  <th className="px-5 py-4">{t('common.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -96,7 +103,7 @@ export default function AdminOrdersPage() {
                   <tr key={order._id} className="hover:bg-slate-50">
                     <td className="px-5 py-4">
                       <p className="font-black text-slate-800">
-                        {order.product_variety}
+                        {formatVariety(order.product_variety)}
                       </p>
                       <p className="mt-1 text-xs text-slate-400">
                         #{order._id.slice(-6).toUpperCase()} ·{' '}
@@ -106,7 +113,9 @@ export default function AdminOrdersPage() {
                     <td className="px-5 py-4">
                       <p className="font-semibold">{order.farmer_name}</p>
                       <p className="text-xs text-slate-500">
-                        Buyer: {order.buyer_name}
+                        {t('pages.admin.buyer_label', {
+                          name: order.buyer_name,
+                        })}
                       </p>
                     </td>
                     <td className="px-5 py-4">
@@ -114,7 +123,7 @@ export default function AdminOrdersPage() {
                         {formatCurrency(order.total_price)}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {order.quantity_kg} kg
+                        {order.quantity_kg} {t('common.kg')}
                       </p>
                     </td>
                     <td className="px-5 py-4">
@@ -123,7 +132,7 @@ export default function AdminOrdersPage() {
                         {formatOrderStatus(order.payment_status || 'pending')}
                       </span>
                       <p className="mt-1 text-xs text-slate-400">
-                        {formatOrderStatus(
+                        {formatPaymentMethod(
                           order.payment_method || 'cash_on_delivery',
                         )}
                       </p>
@@ -138,7 +147,7 @@ export default function AdminOrdersPage() {
                             loading={confirming === order._id}
                             onClick={() => confirmTransfer(order._id)}
                           >
-                            Confirm received
+                            {t('pages.admin.confirm_received')}
                           </Button>
                         )}
                     </td>
@@ -158,7 +167,7 @@ export default function AdminOrdersPage() {
                       className="px-5 py-16 text-center text-slate-400"
                     >
                       <PackageCheck className="mx-auto mb-3 h-8 w-8" />
-                      No orders found.
+                      {t('pages.admin.no_orders')}
                     </td>
                   </tr>
                 )}

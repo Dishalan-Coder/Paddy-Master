@@ -8,19 +8,19 @@ export default function RoleSelector({ value, onChange }) {
     {
       value: 'farmer',
       label: t('im_farmer'),
-      description: 'Manage fields and sell paddy',
+      description: t('auth.farmer_description'),
       icon: Sprout,
     },
     {
       value: 'buyer',
       label: t('im_buyer'),
-      description: 'Source paddy and manage orders',
+      description: t('auth.buyer_description'),
       icon: Store,
     },
   ];
   return (
     <div>
-      <label className="label">Choose account type</label>
+      <label className="label">{t('auth.account_type')}</label>
       <div className="grid grid-cols-2 gap-3">
         {roles.map((role) => (
           <button

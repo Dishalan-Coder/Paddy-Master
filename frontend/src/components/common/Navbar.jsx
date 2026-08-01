@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   ChevronDown,
-  Globe,
   LogOut,
   Menu,
   Search,
@@ -13,10 +12,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import notificationService from '../../services/notificationService';
+import { formatRole } from '../../utils/formatters';
+import LanguageToggle from './LanguageToggle';
 import NotificationPanel from '../notifications/NotificationPanel';
 
 export default function Navbar({ onToggleSidebar, sidebarOpen }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -91,23 +92,14 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder={`${t('search')} marketplace...`}
+            placeholder={t('common.search_marketplace_placeholder')}
             className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            aria-label="Search marketplace"
+            aria-label={t('common.search_marketplace')}
           />
         </form>
       </div>
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() =>
-            i18n.changeLanguage(i18n.language === 'en' ? 'ta' : 'en')
-          }
-          className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800 hover:bg-emerald-100"
-        >
-          <Globe className="h-4 w-4" />
-          {i18n.language === 'en' ? 'தமிழ்' : 'EN'}
-        </button>
+        <LanguageToggle compact />
         <div className="relative">
           <button
             type="button"
@@ -131,7 +123,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
             <>
               <button
                 type="button"
-                aria-label="Close notifications"
+                aria-label={t('common.close_notifications')}
                 className="fixed inset-0 z-40"
                 onClick={() => setNotificationsOpen(false)}
               />
@@ -171,7 +163,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
                 {user?.full_name}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                {user?.role}
+                {formatRole(user?.role)}
               </p>
             </div>
             <ChevronDown className="h-4 w-4 text-slate-400" />
@@ -180,7 +172,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
             <>
               <button
                 type="button"
-                aria-label="Close profile menu"
+                aria-label={t('common.close_profile_menu')}
                 className="fixed inset-0 z-40"
                 onClick={() => setProfileOpen(false)}
               />
@@ -194,7 +186,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
                   className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <UserRound className="h-4 w-4" />
-                  My profile
+                  {t('common.my_profile')}
                 </button>
                 <button
                   type="button"

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BadgeCheck, Plus, ShieldCheck, Store } from 'lucide-react';
 import SearchFilter from '../components/marketplace/SearchFilter';
@@ -17,6 +18,7 @@ const initialFilters = {
 };
 
 export default function MarketplacePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState(() => ({
@@ -56,14 +58,13 @@ export default function MarketplacePage() {
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-emerald-200">
-              <Store className="h-4 w-4" /> Direct paddy marketplace
+              <Store className="h-4 w-4" /> {t('pages.marketplace.badge')}
             </div>
             <h1 className="mt-4 font-display text-3xl font-black sm:text-4xl">
-              Buy and sell with transparent information
+              {t('pages.marketplace.title')}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-100">
-              Compare varieties, quantities, regions, prices, verified farmer
-              status, ratings, and payment options.
+              {t('pages.marketplace.copy')}
             </p>
           </div>
           {user?.role === 'farmer' && (
@@ -71,17 +72,18 @@ export default function MarketplacePage() {
               to="/products/new"
               className="inline-flex items-center gap-2 rounded-xl bg-lime-300 px-5 py-3 text-sm font-black text-emerald-950"
             >
-              <Plus className="h-4 w-4" /> List paddy
+              <Plus className="h-4 w-4" /> {t('add_product')}
             </Link>
           )}
         </div>
         <div className="mt-6 flex flex-wrap gap-3 text-xs font-semibold text-emerald-100">
           <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-            <BadgeCheck className="h-3.5 w-3.5 text-lime-300" /> Verified
-            profiles
+            <BadgeCheck className="h-3.5 w-3.5 text-lime-300" />{' '}
+            {t('pages.marketplace.verified_profiles')}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-lime-300" /> Order tracking
+            <ShieldCheck className="h-3.5 w-3.5 text-lime-300" />{' '}
+            {t('pages.marketplace.order_tracking')}
           </span>
         </div>
       </section>
