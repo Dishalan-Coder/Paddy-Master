@@ -11,16 +11,22 @@ from app.models.product import ProductStatus
 
 def user_token(fake_database, role: str, email: str):
     user_id = ObjectId()
-    fake_database.users.documents.append(
-        {
+    user_doc = {
             "_id": user_id,
             "full_name": f"{role.title()} User",
             "email": email,
             "phone": f"077{str(len(fake_database.users.documents) + 1).zfill(7)}",
             "role": role,
             "district": "Kilinochchi",
-        }
-    )
+    }
+    if role == "farmer":
+        user_doc.update(
+            {
+                "subscription_status": "active",
+                "subscription_plan": "farmer_pro",
+            }
+        )
+    fake_database.users.documents.append(user_doc)
     return user_id, create_access_token({"sub": str(user_id), "role": role})
 
 

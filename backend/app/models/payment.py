@@ -1,7 +1,7 @@
 """Payment and subscription workflow models."""
 
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -60,3 +60,11 @@ class SubscriptionStatusResponse(BaseModel):
     cancel_at_period_end: bool = False
     stripe_customer_id: Optional[str] = None
     stripe_subscription_id: Optional[str] = None
+    monthly_price_lkr: int = 0
+    currency: str = "LKR"
+    free_trial_days: Optional[int] = None
+    free_trial_ends_at: Optional[str] = None
+    free_trial_active: bool = False
+    premium_features: List[str] = Field(default_factory=list)
+    premium_features_active: bool = True
+    general_features_active: bool = True

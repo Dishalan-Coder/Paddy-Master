@@ -47,8 +47,16 @@ const AdminOrdersPage = lazyWithRetry(() => import('../pages/AdminOrdersPage'));
 const AdminPricesPage = lazyWithRetry(() => import('../pages/AdminPricesPage'));
 const NotFoundPage = lazyWithRetry(() => import('../pages/NotFoundPage'));
 
-const farmerOnly = (element) => (
-  <ProtectedRoute roles={['farmer']}>{element}</ProtectedRoute>
+const farmerOnly = (element, farmerAccess) => (
+  <ProtectedRoute roles={['farmer']} farmerAccess={farmerAccess}>
+    {element}
+  </ProtectedRoute>
+);
+
+const farmerGate = (element, farmerAccess) => (
+  <ProtectedRoute roles={['farmer', 'buyer']} farmerAccess={farmerAccess}>
+    {element}
+  </ProtectedRoute>
 );
 
 export default function AppRoutes() {
@@ -83,24 +91,48 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/farms" element={farmerOnly(<FarmsPage />)} />
-          <Route path="/farms/new" element={farmerOnly(<AddFarmPage />)} />
-          <Route path="/crops/new" element={farmerOnly(<AddCropPage />)} />
-          <Route path="/crops" element={farmerOnly(<CropsPage />)} />
-          <Route path="/expenses" element={farmerOnly(<ExpensesPage />)} />
+          <Route
+            path="/dashboard"
+            element={farmerGate(<DashboardPage />, 'trial')}
+          />
+          <Route path="/farms" element={farmerOnly(<FarmsPage />, 'trial')} />
+          <Route
+            path="/farms/new"
+            element={farmerOnly(<AddFarmPage />, 'trial')}
+          />
+          <Route
+            path="/crops/new"
+            element={farmerOnly(<AddCropPage />, 'trial')}
+          />
+          <Route path="/crops" element={farmerOnly(<CropsPage />, 'trial')} />
+          <Route
+            path="/expenses"
+            element={farmerOnly(<ExpensesPage />, 'trial')}
+          />
           <Route
             path="/recommendations"
-            element={farmerOnly(<RecommendationsPage />)}
+            element={farmerOnly(<RecommendationsPage />, 'premium')}
           />
-          <Route path="/prices-weather" element={<WeatherPricesPage />} />
-          <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route
+            path="/prices-weather"
+            element={farmerGate(<WeatherPricesPage />, 'trial')}
+          />
+          <Route
+            path="/marketplace"
+            element={farmerGate(<MarketplacePage />, 'premium')}
+          />
           <Route
             path="/products/new"
-            element={farmerOnly(<AddProductPage />)}
+            element={farmerOnly(<AddProductPage />, 'premium')}
           />
-          <Route path="/products/:id" element={<ProductDetailsPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
+          <Route
+            path="/products/:id"
+            element={farmerGate(<ProductDetailsPage />, 'premium')}
+          />
+          <Route
+            path="/orders"
+            element={farmerGate(<OrdersPage />, 'premium')}
+          />
           <Route path="/billing" element={<BillingPage />} />
         </Route>
 

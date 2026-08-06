@@ -14,7 +14,10 @@ from fastapi import (
 )
 
 from app.middleware.auth_middleware import get_current_user
-from app.middleware.role_middleware import require_farmer
+from app.middleware.subscription_middleware import (
+    assert_farmer_premium_access,
+    require_farmer_premium_access,
+)
 from app.models.product import ProductCreate, ProductUpdate
 from app.services import product_service, s3_service
 
@@ -35,7 +38,7 @@ async def create_product(
     description: Optional[str] = Form(None),
     is_organic: bool = Form(False),
     images: List[UploadFile] = File(default=[]),
-    user=Depends(require_farmer),
+    user=Depends(require_farmer_premium_access),
 ):
     if len(images) > 5:
         raise HTTPException(status_code=400, detail="Upload a maximum of 5 images")
@@ -72,7 +75,7 @@ async def create_product(
 
 
 @router.get("/my")
-async def my_products(user=Depends(require_farmer)):
+async def my_products(user=Depends(require_farmer_premium_access)):
     return await product_service.get_farmer_products(user["_id"])
 
 
@@ -90,6 +93,8 @@ async def list_products(
     limit: int = Query(20, ge=1, le=100),
     user=Depends(get_current_user),
 ):
+    if user.get("role") == "farmer":
+        assert_farmer_premium_access(user)
     if min_price is not None and max_price is not None and min_price > max_price:
         raise HTTPException(
             status_code=400, detail="Minimum price cannot exceed maximum price"
@@ -110,6 +115,8 @@ async def list_products(
 
 @router.get("/{product_id}")
 async def get_product(product_id: str, user=Depends(get_current_user)):
+    if user.get("role") == "farmer":
+        assert_farmer_premium_access(user)
     product = await product_service.get_product_by_id(product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -118,7 +125,7 @@ async def get_product(product_id: str, user=Depends(get_current_user)):
 
 @router.put("/{product_id}")
 async def update_product(
-    product_id: str, data: ProductUpdate, user=Depends(require_farmer)
+    product_id: str, data: ProductUpdate, user=Depends(require_farmer_premium_access)
 ):
     product = await product_service.update_product(product_id, user["_id"], data)
     if not product:
@@ -127,6 +134,6 @@ async def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(product_id: str, user=Depends(require_farmer)):
+async def delete_product(product_id: str, user=Depends(require_farmer_premium_access)):
     if not await product_service.delete_product(product_id, user["_id"]):
         raise HTTPException(status_code=404, detail="Product not found")

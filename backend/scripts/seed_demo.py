@@ -18,7 +18,17 @@ DEMO_PASSWORD = "Demo123!"
 
 
 async def upsert_user(
-    db, *, email: str, phone: str, name: str, role: str, district: str, verified: bool
+    db,
+    *,
+    email: str,
+    phone: str,
+    name: str,
+    role: str,
+    district: str,
+    verified: bool,
+    subscription_plan: str | None = None,
+    subscription_status: str = "inactive",
+    subscription_current_period_end: datetime | None = None,
 ):
     now = datetime.now(timezone.utc)
     await db.users.update_one(
@@ -36,6 +46,10 @@ async def upsert_user(
                 "rating": 4.8 if role == "farmer" else 0.0,
                 "total_reviews": 12 if role == "farmer" else 0,
                 "wallet_balance": 245000.0 if role == "farmer" else 0.0,
+                "subscription_plan": subscription_plan,
+                "subscription_status": subscription_status,
+                "subscription_current_period_end": subscription_current_period_end,
+                "subscription_cancel_at_period_end": False,
                 "updated_at": now,
             },
             "$setOnInsert": {"created_at": now},
@@ -67,6 +81,9 @@ async def main():
         role="farmer",
         district="Kilinochchi",
         verified=True,
+        subscription_plan="farmer_pro",
+        subscription_status="active",
+        subscription_current_period_end=now + timedelta(days=30),
     )
     buyer = await upsert_user(
         db,
@@ -75,6 +92,15 @@ async def main():
         name="Nimal Traders",
         role="buyer",
         district="Colombo",
+        verified=True,
+    )
+    buyer_two = await upsert_user(
+        db,
+        email="buyer2@paddymaster.lk",
+        phone="0770000004",
+        name="Ruhunu Rice Mills",
+        role="buyer",
+        district="Hambantota",
         verified=True,
     )
 
@@ -221,37 +247,25 @@ async def main():
     price_docs = []
     for offset in range(7):
         day = date.today() - timedelta(days=6 - offset)
-        price_docs.append(
-            {
-                "date": day.isoformat(),
-                "region": "national",
-                "prices": {
-                    "nadu": 108 + offset * 0.7,
-                    "samba": 115 + offset * 0.5,
-                    "k_samba": 119 + offset * 0.4,
-                },
-                "demo_seed": True,
-                "created_at": now,
-            }
-        )
-    for region, delta in [
-        ("Kilinochchi", -1.5),
-        ("Anuradhapura", 0.5),
-        ("Polonnaruwa", 1.0),
-    ]:
-        price_docs.append(
-            {
-                "date": date.today().isoformat(),
-                "region": region,
-                "prices": {
-                    "nadu": 112 + delta,
-                    "samba": 118 + delta,
-                    "k_samba": 121 + delta,
-                },
-                "demo_seed": True,
-                "created_at": now,
-            }
-        )
+        for buyer_doc, premium in [(buyer, 0), (buyer_two, 140)]:
+            price_docs.append(
+                {
+                    "date": day.isoformat(),
+                    "region": buyer_doc["district"],
+                    "prices": {
+                        "nadu": round((108 + offset * 0.7) * 72 + premium, 2),
+                        "samba": round((115 + offset * 0.5) * 72 + premium, 2),
+                        "k_samba": round((119 + offset * 0.4) * 72 + premium, 2),
+                    },
+                    "price_unit_kg": 72,
+                    "buyer_id": buyer_doc["_id"],
+                    "buyer_name": buyer_doc["full_name"],
+                    "buyer_district": buyer_doc["district"],
+                    "created_by_role": "buyer",
+                    "demo_seed": True,
+                    "created_at": now,
+                }
+            )
     await db.market_prices.insert_many(price_docs)
 
     await db.notifications.delete_many({"demo_seed": True})
@@ -295,7 +309,7 @@ async def main():
 
     print("Demo data created.")
     print(f"Admin:  admin@paddymaster.lk / {DEMO_PASSWORD}")
-    print(f"Farmer: farmer@paddymaster.lk / {DEMO_PASSWORD}")
+    print(f"Farmer: farmer@paddymaster.lk / {DEMO_PASSWORD} (Farmer Pro active)")
     print(f"Buyer:  buyer@paddymaster.lk / {DEMO_PASSWORD}")
     client.close()
 

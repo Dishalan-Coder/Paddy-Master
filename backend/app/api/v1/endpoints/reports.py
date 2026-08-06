@@ -2,14 +2,15 @@
 
 from fastapi import APIRouter, Depends
 
-from app.middleware.role_middleware import require_admin, require_buyer, require_farmer
+from app.middleware.role_middleware import require_admin, require_buyer
+from app.middleware.subscription_middleware import require_farmer_general_access
 from app.services import report_service
 
 router = APIRouter()
 
 
 @router.get("/")
-async def farmer_dashboard(user=Depends(require_farmer)):
+async def farmer_dashboard(user=Depends(require_farmer_general_access)):
     return await report_service.get_farmer_dashboard(user["_id"])
 
 

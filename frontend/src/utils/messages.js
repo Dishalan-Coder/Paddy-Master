@@ -40,6 +40,8 @@ const API_MESSAGE_KEYS = {
   'Expected harvest date must be after planting date': 'validation.harvest_after_planting',
   'Farm not found': 'api_errors.farm_not_found',
   'Farm not found or not owned by you': 'api_errors.farm_not_owned',
+  'Farmer subscription required for Marketplace, Smart Advisory, and Orders':
+    'api_errors.farmer_premium_required',
   'Image must be 5 MB or smaller': 'validation.image_size_simple',
   'Image storage is currently unavailable': 'api_errors.image_storage_unavailable',
   'Internal server error': 'api_errors.internal_server_error',
@@ -90,6 +92,8 @@ const API_MESSAGE_KEYS = {
   'You cannot message yourself': 'api_errors.message_self',
   'You cannot order your own product': 'api_errors.order_own_product',
   'Only numbers can be entered': 'validation.only_numbers',
+  'Your 21-day free access has ended. Start the LKR 150 farmer subscription to continue.':
+    'api_errors.farmer_trial_expired',
 };
 
 const API_MESSAGE_OPTIONS = {

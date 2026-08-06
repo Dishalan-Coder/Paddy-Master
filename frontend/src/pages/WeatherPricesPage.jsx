@@ -4,6 +4,8 @@ import { CloudSun, TrendingUp } from 'lucide-react';
 import WeatherCard from '../components/weather/WeatherCard';
 import MarketPriceList from '../components/prices/MarketPriceList';
 import PriceTrendChart from '../components/prices/PriceTrendChart';
+import BuyerPriceForm from '../components/prices/BuyerPriceForm';
+import ChatBox from '../components/chat/ChatBox';
 import Loader from '../components/common/Loader';
 import ErrorAlert from '../components/common/ErrorAlert';
 import useFetch from '../hooks/useFetch';
@@ -18,6 +20,7 @@ export default function WeatherPricesPage() {
   const { user } = useAuth();
   const [district, setDistrict] = useState(user?.district || 'Anuradhapura');
   const [priceUnitKg, setPriceUnitKg] = useState(MARKET_PRICE_UNITS[0]);
+  const [chatReceiverId, setChatReceiverId] = useState('');
   const {
     data: weather,
     loading: weatherLoading,
@@ -30,11 +33,15 @@ export default function WeatherPricesPage() {
     data: prices,
     loading: pricesLoading,
     error: pricesError,
+    refetch: refetchPrices,
   } = useFetch(
     () => priceService.getPrices({ price_unit_kg: priceUnitKg }),
     [priceUnitKg],
   );
   if (weatherLoading || pricesLoading) return <Loader />;
+  const chatConversationId = chatReceiverId
+    ? [user?.id, chatReceiverId].filter(Boolean).sort().join('-')
+    : '';
   return (
     <div className="space-y-7 animate-fadeIn">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -89,9 +96,20 @@ export default function WeatherPricesPage() {
               {t('pages.weather_prices.price_intelligence')}
             </h2>
           </div>
+          {user?.role === 'buyer' && (
+            <BuyerPriceForm
+              priceUnitKg={prices?.selected_unit_kg || priceUnitKg}
+              currentOffer={prices?.current_buyer_offer}
+              onSaved={refetchPrices}
+            />
+          )}
           <MarketPriceList
             latest={prices?.latest}
             regional={prices?.regional}
+            buyerPrices={prices?.buyer_prices}
+            canContact={user?.role === 'farmer'}
+            currentUserId={user?.id}
+            onContactBuyer={setChatReceiverId}
           />
           <PriceTrendChart
             trend={prices?.trend}
@@ -99,6 +117,13 @@ export default function WeatherPricesPage() {
           />
         </div>
       </div>
+      {chatReceiverId && (
+        <ChatBox
+          receiverId={chatReceiverId}
+          conversationId={chatConversationId}
+          onClose={() => setChatReceiverId('')}
+        />
+      )}
     </div>
   );
 }

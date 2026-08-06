@@ -29,11 +29,11 @@ Owns farms, crops, expenses, product listings, and fulfilment actions. Farmer-ow
 
 ### Buyer
 
-Can browse active listings, place orders, complete an MVP payment step, track purchases, and review delivered purchases. Buyers cannot purchase their own farmer listings.
+Can browse active listings, publish wholesale paddy price offers, place orders, complete an MVP payment step, track purchases, and review delivered purchases. Buyers cannot purchase their own farmer listings.
 
 ### Administrator
 
-Can view platform analytics, verify accounts, inspect users/orders/products, remove products/users, and maintain regional market prices. An administrator cannot delete their own account.
+Can view platform analytics, verify accounts, inspect users/orders/products, remove products/users, and monitor buyer-published prices. An administrator cannot delete their own account.
 
 ## Main collections
 
@@ -45,7 +45,7 @@ Can view platform analytics, verify accounts, inspect users/orders/products, rem
 - `orders`: buyer/farmer transaction, fulfilment, and payment state
 - `reviews`: delivered-order verified reviews
 - `notifications`: user-specific event/reminder messages
-- `market_prices`: daily regional paddy-price snapshots
+- `market_prices`: daily buyer-published paddy price offers by unit, region, and buyer
 - `messages`: conversation messages
 
 ## Image design

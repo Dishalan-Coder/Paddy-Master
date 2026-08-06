@@ -17,6 +17,7 @@ import RecommendationList from '../components/recommendations/RecommendationList
 import Loader from '../components/common/Loader';
 import useFetch from '../hooks/useFetch';
 import { useAuth } from '../context/AuthContext';
+import { hasFarmerPremiumAccess } from '../utils/subscriptionAccess';
 import {
   formatCurrency,
   formatDate,
@@ -31,6 +32,7 @@ import recommendationService from '../services/recommendationService';
 export default function FarmerDashboardPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const premiumAccess = hasFarmerPremiumAccess(user);
   const { data: dashboard, loading: dashboardLoading } = useFetch(
     () => dashboardService.getFarmerData(),
     [],
@@ -46,7 +48,13 @@ export default function FarmerDashboardPage() {
       ),
     [user?.district],
   );
-  const { data: advisory } = useFetch(() => recommendationService.getAll(), []);
+  const { data: advisory } = useFetch(
+    () =>
+      premiumAccess
+        ? recommendationService.getAll()
+        : Promise.resolve({ recommendations: [] }),
+    [premiumAccess],
+  );
 
   if (dashboardLoading) return <Loader />;
   const firstAlert = weather?.alerts?.[0];
@@ -225,16 +233,30 @@ export default function FarmerDashboardPage() {
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-black">{t('recommendations')}</h2>
               <Link
-                to="/recommendations"
+                to={premiumAccess ? '/recommendations' : '/billing?required=premium'}
                 className="text-xs font-black text-emerald-700"
               >
                 {t('common.view_all')}
               </Link>
             </div>
-            <RecommendationList
-              compact
-              recommendations={(advisory?.recommendations || []).slice(0, 3)}
-            />
+            {premiumAccess ? (
+              <RecommendationList
+                compact
+                recommendations={(advisory?.recommendations || []).slice(0, 3)}
+              />
+            ) : (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+                <p className="font-black">
+                  {t('pages.billing.premium_required')}
+                </p>
+                <Link
+                  to="/billing?required=premium"
+                  className="mt-2 inline-flex text-sm font-black text-amber-900"
+                >
+                  {t('pages.billing.start_farmer_subscription')}
+                </Link>
+              </div>
+            )}
           </section>
         </aside>
       </div>
