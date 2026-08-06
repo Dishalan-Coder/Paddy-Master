@@ -6,7 +6,8 @@ from typing import Dict
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.middleware.auth_middleware import get_current_user
-from app.middleware.role_middleware import require_admin
+from app.middleware.role_middleware import require_buyer
+from app.middleware.subscription_middleware import assert_farmer_general_access
 from app.services import price_service
 
 router = APIRouter()
@@ -18,7 +19,9 @@ async def get_prices(
     user=Depends(get_current_user),
 ):
     try:
-        return await price_service.get_latest_prices(price_unit_kg)
+        if user.get("role") == "farmer":
+            assert_farmer_general_access(user)
+        return await price_service.get_latest_prices(price_unit_kg, user)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -29,11 +32,11 @@ async def update_prices(
     region: str = "national",
     price_date: date | None = None,
     price_unit_kg: int = price_service.DEFAULT_PRICE_UNIT_KG,
-    admin=Depends(require_admin),
+    buyer=Depends(require_buyer),
 ):
     try:
         return await price_service.update_market_prices(
-            prices, region, price_date, price_unit_kg
+            prices, region, price_date, price_unit_kg, buyer
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

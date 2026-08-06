@@ -35,6 +35,9 @@ async def connect_db() -> None:
         await db.market_prices.create_index(
             [("region", 1), ("price_unit_kg", 1), ("date", -1)]
         )
+        await db.market_prices.create_index(
+            [("buyer_id", 1), ("price_unit_kg", 1), ("date", -1)]
+        )
         await db.notifications.create_index([("user_id", 1), ("created_at", -1)])
         await db.notifications.create_index(
             [("user_id", 1), ("metadata.reminder_key", 1)],

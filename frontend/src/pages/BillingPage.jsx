@@ -16,6 +16,10 @@ import { useAuth } from '../context/AuthContext';
 import paymentService from '../services/paymentService';
 import { formatDate, formatOrderStatus } from '../utils/formatters';
 import { getApiErrorMessage } from '../utils/forms';
+import {
+  getFreeTrialEndsAt,
+  isFarmerFreeTrialActive,
+} from '../utils/subscriptionAccess';
 
 const ACTIVE_STATUSES = new Set(['active', 'trialing']);
 
@@ -23,6 +27,7 @@ const PLANS = {
   farmer: {
     value: 'farmer_pro',
     nameKey: 'pages.billing.farmer_pro',
+    priceKey: 'pages.billing.farmer_monthly_price',
     summaryKey: 'pages.billing.farmer_summary',
     highlights: [
       'pages.billing.farmer_highlight_1',
@@ -33,6 +38,7 @@ const PLANS = {
   buyer: {
     value: 'buyer_pro',
     nameKey: 'pages.billing.buyer_pro',
+    priceKey: 'pages.billing.buyer_monthly_price',
     summaryKey: 'pages.billing.buyer_summary',
     highlights: [
       'pages.billing.buyer_highlight_1',
@@ -53,7 +59,21 @@ export default function BillingPage() {
 
   const plan = PLANS[user?.role] || PLANS.farmer;
   const checkoutState = searchParams.get('checkout');
+  const requiredAccess = searchParams.get('required');
   const isActive = ACTIVE_STATUSES.has(subscription?.status);
+  const isFarmer = user?.role === 'farmer';
+  const trialUser = {
+    ...(user || {}),
+    access: {
+      ...(user?.access || {}),
+      free_trial_active:
+        subscription?.free_trial_active ?? user?.access?.free_trial_active,
+      free_trial_ends_at:
+        subscription?.free_trial_ends_at || user?.access?.free_trial_ends_at,
+    },
+  };
+  const freeTrialActive = isFarmerFreeTrialActive(trialUser);
+  const freeTrialEndsAt = getFreeTrialEndsAt(trialUser);
 
   const notice = useMemo(() => {
     if (checkoutState === 'success') {
@@ -62,8 +82,14 @@ export default function BillingPage() {
     if (checkoutState === 'cancelled') {
       return t('pages.billing.checkout_cancelled');
     }
+    if (requiredAccess === 'premium') {
+      return t('pages.billing.premium_required');
+    }
+    if (requiredAccess === 'trial') {
+      return t('pages.billing.trial_expired');
+    }
     return '';
-  }, [checkoutState, t]);
+  }, [checkoutState, requiredAccess, t]);
 
   const loadSubscription = async () => {
     setLoading(true);
@@ -165,7 +191,7 @@ export default function BillingPage() {
                 {t('pages.billing.stripe_plan')}
               </h2>
               <p className="mt-3 text-3xl font-black text-emerald-700">
-                {t('pages.billing.monthly_price')}
+                {t(plan.priceKey)}
               </p>
               <p className="mt-1 text-xs font-black uppercase tracking-[0.14em] text-slate-400">
                 {t('pages.billing.monthly_price_note')}
@@ -173,6 +199,20 @@ export default function BillingPage() {
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
                 {t(plan.summaryKey)}
               </p>
+              {isFarmer && (
+                <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+                  <p className="font-black">
+                    {freeTrialActive
+                      ? t('pages.billing.free_trial_active')
+                      : t('pages.billing.free_trial_ended')}
+                  </p>
+                  <p className="mt-1 text-emerald-800">
+                    {t('pages.billing.free_trial_ends', {
+                      date: formatDate(freeTrialEndsAt),
+                    })}
+                  </p>
+                </div>
+              )}
             </div>
             <div
               className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-black ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}
@@ -245,6 +285,18 @@ export default function BillingPage() {
                 {formatOrderStatus(subscription?.status || 'inactive')}
               </p>
             </div>
+            {isFarmer && (
+              <div>
+                <p className="text-sm font-semibold text-slate-500">
+                  {t('pages.billing.free_trial')}
+                </p>
+                <p className="mt-1 text-lg font-black text-slate-950">
+                  {freeTrialActive
+                    ? t('pages.billing.free_trial_available')
+                    : t('pages.billing.free_trial_unavailable')}
+                </p>
+              </div>
+            )}
             <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4">
               <CalendarClock className="mt-0.5 h-5 w-5 text-slate-400" />
               <div>

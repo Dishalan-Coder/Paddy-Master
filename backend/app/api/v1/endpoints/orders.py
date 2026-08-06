@@ -3,7 +3,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.middleware.auth_middleware import get_current_user
-from app.middleware.role_middleware import require_buyer, require_farmer
+from app.middleware.role_middleware import require_buyer
+from app.middleware.subscription_middleware import (
+    assert_farmer_premium_access,
+    require_farmer_premium_access,
+)
 from app.models.order import OrderCreate
 from app.services import order_service
 
@@ -24,7 +28,7 @@ async def buyer_orders(user=Depends(require_buyer)):
 
 
 @router.get("/farmer")
-async def farmer_orders(user=Depends(require_farmer)):
+async def farmer_orders(user=Depends(require_farmer_premium_access)):
     return await order_service.get_farmer_orders(user["_id"])
 
 
@@ -35,6 +39,8 @@ async def update_status(
     new_status = status_data.get("status")
     if not new_status:
         raise HTTPException(status_code=400, detail="Status field required")
+    if user.get("role") == "farmer":
+        assert_farmer_premium_access(user)
     try:
         result = await order_service.update_order_status(order_id, user, new_status)
     except ValueError as exc:

@@ -88,10 +88,10 @@ Demo accounts:
 | Role | Email | Password |
 |---|---|---|
 | Administrator | `admin@paddymaster.lk` | `Demo123!` |
-| Farmer | `farmer@paddymaster.lk` | `Demo123!` |
+| Farmer (Farmer Pro active) | `farmer@paddymaster.lk` | `Demo123!` |
 | Buyer | `buyer@paddymaster.lk` | `Demo123!` |
 
-The seed command is idempotent and intended only for local demonstration.
+The seed command is idempotent and intended only for local demonstration. It gives the demo farmer an active Farmer Pro subscription for premium farmer features.
 
 ### Stop
 
@@ -179,7 +179,7 @@ Set `WEATHER_API_KEY` in the root `.env` to use OpenWeatherMap. Without a key, t
 
 Order payments still support cash on delivery, bank transfer, and the local demo-card workflow. Account subscriptions use Stripe Checkout and Stripe Billing Portal:
 
-- Farmers subscribe to the Farmer Pro price configured by `STRIPE_FARMER_PRICE_ID`.
+- Farmers subscribe to the Farmer Pro price configured by `STRIPE_FARMER_PRICE_ID`; configure that Stripe recurring price as LKR 150/month. Marketplace, Smart Advisory, and Orders require this subscription, while other farmer tools are free for 21 days from registration.
 - Buyers subscribe to the Buyer Pro price configured by `STRIPE_BUYER_PRICE_ID`.
 - Stripe webhooks update each user's subscription status after checkout, renewals, cancellations, and plan changes.
 
@@ -205,7 +205,7 @@ Register the backend webhook URL in Stripe as `/api/v1/payments/subscription/web
 | `S3_BUCKET_NAME` | S3 bucket name |
 | `STRIPE_SECRET_KEY` | Stripe secret API key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `STRIPE_FARMER_PRICE_ID` | Stripe recurring price ID for Farmer Pro |
+| `STRIPE_FARMER_PRICE_ID` | Stripe recurring price ID for Farmer Pro, configured as LKR 150/month |
 | `STRIPE_BUYER_PRICE_ID` | Stripe recurring price ID for Buyer Pro |
 | `STRIPE_SUCCESS_URL` | Optional Checkout success URL override |
 | `STRIPE_CANCEL_URL` | Optional Checkout cancel URL override |

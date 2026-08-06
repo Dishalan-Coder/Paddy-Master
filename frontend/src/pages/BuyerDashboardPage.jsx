@@ -34,9 +34,12 @@ export default function BuyerDashboardPage() {
     [],
   );
   const { data: prices } = useFetch(() => priceService.getPrices(), []);
-  const bestPrice = prices?.latest?.prices
-    ? Math.min(...Object.values(prices.latest.prices))
-    : 0;
+  const buyerOffers = prices?.buyer_prices || [];
+  const bestPrice = buyerOffers.length
+    ? Math.max(...buyerOffers.map((offer) => Number(offer.best_offer || 0)))
+    : prices?.latest?.prices
+      ? Math.max(...Object.values(prices.latest.prices))
+      : 0;
   const marketPriceUnitKg =
     prices?.selected_unit_kg || prices?.latest?.price_unit_kg || 72;
 
@@ -59,10 +62,10 @@ export default function BuyerDashboardPage() {
             </p>
           </div>
           <Link
-            to="/marketplace"
+            to="/prices-weather"
             className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950"
           >
-            {t('dashboard_pages.browse_marketplace')}{' '}
+            {t('dashboard_pages.set_buyer_prices')}{' '}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

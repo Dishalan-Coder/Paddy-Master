@@ -16,12 +16,12 @@ from app.models.payment import (
     SubscriptionStatus,
 )
 from app.services.notification_service import create_notification
+from app.services.subscription_access import (
+    ACTIVE_SUBSCRIPTION_STATUSES,
+    FARMER_MONTHLY_PRICE_LKR,
+    access_summary,
+)
 from app.utils.mongo import object_id_or_none, serialize_document
-
-ACTIVE_SUBSCRIPTION_STATUSES = {
-    SubscriptionStatus.ACTIVE.value,
-    SubscriptionStatus.TRIALING.value,
-}
 
 STRIPE_SUBSCRIPTION_EVENTS = {
     "customer.subscription.created",
@@ -88,7 +88,7 @@ def _plan_settings(plan: SubscriptionPlan) -> dict:
         SubscriptionPlan.FARMER_PRO: {
             "role": "farmer",
             "price_id": settings.STRIPE_FARMER_PRICE_ID.strip(),
-            "name": "Farmer Pro",
+            "name": f"Farmer Pro LKR {FARMER_MONTHLY_PRICE_LKR}",
         },
         SubscriptionPlan.BUYER_PRO: {
             "role": "buyer",
@@ -271,6 +271,7 @@ def subscription_summary(user: dict) -> dict:
     plan = user.get("subscription_plan")
     if plan not in {item.value for item in SubscriptionPlan}:
         plan = None
+    access = access_summary(user)
     return {
         "plan": plan,
         "status": status,
@@ -283,6 +284,14 @@ def subscription_summary(user: dict) -> dict:
         ),
         "stripe_customer_id": user.get("stripe_customer_id"),
         "stripe_subscription_id": user.get("stripe_subscription_id"),
+        "monthly_price_lkr": access["monthly_price_lkr"],
+        "currency": access["currency"],
+        "free_trial_days": access.get("free_trial_days"),
+        "free_trial_ends_at": access.get("free_trial_ends_at"),
+        "free_trial_active": access.get("free_trial_active", False),
+        "premium_features": access.get("premium_features", []),
+        "premium_features_active": access.get("premium_features_active", True),
+        "general_features_active": access.get("general_features_active", True),
     }
 
 

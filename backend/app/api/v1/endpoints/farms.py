@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo import ReturnDocument
 
 from app.db.mongodb import get_database_or_raise
-from app.middleware.role_middleware import require_farmer
+from app.middleware.subscription_middleware import require_farmer_general_access
 from app.models.farm import FarmCreate
 from app.utils.mongo import object_id_or_none, serialize_document
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_farm(data: FarmCreate, user=Depends(require_farmer)):
+async def create_farm(data: FarmCreate, user=Depends(require_farmer_general_access)):
     db = get_database_or_raise()
     doc = data.model_dump()
     doc.update({"farmer_id": user["_id"], "created_at": datetime.now(timezone.utc)})
@@ -24,7 +24,7 @@ async def create_farm(data: FarmCreate, user=Depends(require_farmer)):
 
 
 @router.get("/")
-async def get_farms(user=Depends(require_farmer)):
+async def get_farms(user=Depends(require_farmer_general_access)):
     db = get_database_or_raise()
     farms = (
         await db.farms.find({"farmer_id": user["_id"]})
@@ -35,7 +35,9 @@ async def get_farms(user=Depends(require_farmer)):
 
 
 @router.put("/{farm_id}")
-async def update_farm(farm_id: str, data: FarmCreate, user=Depends(require_farmer)):
+async def update_farm(
+    farm_id: str, data: FarmCreate, user=Depends(require_farmer_general_access)
+):
     db = get_database_or_raise()
     oid = object_id_or_none(farm_id)
     if oid is None:
@@ -51,7 +53,7 @@ async def update_farm(farm_id: str, data: FarmCreate, user=Depends(require_farme
 
 
 @router.delete("/{farm_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_farm(farm_id: str, user=Depends(require_farmer)):
+async def delete_farm(farm_id: str, user=Depends(require_farmer_general_access)):
     db = get_database_or_raise()
     oid = object_id_or_none(farm_id)
     if oid is None:

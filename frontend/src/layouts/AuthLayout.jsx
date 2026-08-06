@@ -53,9 +53,6 @@ export default function AuthLayout({ children }) {
             ))}
           </div>
         </div>
-        <p className="relative text-xs text-emerald-200/60">
-          {t('auth_layout.stack')}
-        </p>
       </section>
       <section className="relative flex min-h-screen flex-col items-center justify-between px-4 py-8 sm:px-8">
         <LanguageToggle className="absolute right-5 top-5" compact />

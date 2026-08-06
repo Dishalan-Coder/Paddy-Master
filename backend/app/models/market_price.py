@@ -1,4 +1,4 @@
-"""Daily market price model."""
+"""Buyer-managed market price model."""
 
 from datetime import datetime, date, timezone
 from typing import Optional, Dict
@@ -12,6 +12,9 @@ class MarketPriceCreate(BaseModel):
     )
     price_unit_kg: int = Field(default=72, description="Supported units: 72 or 75 kg")
     region: str = "national"
+    buyer_id: Optional[str] = None
+    buyer_name: Optional[str] = None
+    buyer_district: Optional[str] = None
 
 
 class MarketPriceInDB(MarketPriceCreate):
@@ -27,6 +30,10 @@ class MarketPriceOut(BaseModel):
     prices: Dict[str, float]
     price_unit_kg: int = 72
     region: str
+    buyer_id: Optional[str] = None
+    buyer_name: Optional[str] = None
+    buyer_district: Optional[str] = None
+    best_offer: Optional[float] = None
     created_at: datetime
 
     model_config = ConfigDict(populate_by_name=True)

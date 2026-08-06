@@ -22,6 +22,8 @@ def farmer_token(fake_database):
             "phone": "0770000010",
             "role": "farmer",
             "district": "Kilinochchi",
+            "subscription_status": "active",
+            "subscription_plan": "farmer_pro",
         }
     )
     return user_id, create_access_token({"sub": str(user_id), "role": "farmer"})

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field, field_validator
 
-from app.middleware.role_middleware import require_farmer
+from app.middleware.subscription_middleware import require_farmer_premium_access
 from app.services import recommendation_service
 
 router = APIRouter()
@@ -22,14 +22,16 @@ class AdvisoryChatRequest(BaseModel):
 
 
 @router.get("/")
-async def recommendations(user=Depends(require_farmer)):
+async def recommendations(user=Depends(require_farmer_premium_access)):
     return await recommendation_service.get_farmer_recommendations(
         user["_id"], user.get("district") or "anuradhapura"
     )
 
 
 @router.post("/chat")
-async def advisory_chat(payload: AdvisoryChatRequest, user=Depends(require_farmer)):
+async def advisory_chat(
+    payload: AdvisoryChatRequest, user=Depends(require_farmer_premium_access)
+):
     return await recommendation_service.chat_farmer_advisory(
         user["_id"], payload.message, user.get("district") or "anuradhapura"
     )

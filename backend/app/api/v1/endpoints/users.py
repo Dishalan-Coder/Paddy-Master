@@ -10,6 +10,7 @@ from pymongo.errors import DuplicateKeyError
 from app.db.mongodb import get_database_or_raise
 from app.middleware.auth_middleware import get_current_user
 from app.services import s3_service
+from app.services.subscription_access import access_summary
 from app.utils.mongo import serialize_document
 from app.utils.validators import get_name_validation_error, get_phone_validation_error
 
@@ -57,6 +58,7 @@ def present_user(user: dict) -> dict:
     safe_user.setdefault("subscription_cancel_at_period_end", False)
     safe_user.setdefault("stripe_customer_id", None)
     safe_user.setdefault("stripe_subscription_id", None)
+    safe_user["access"] = access_summary(user)
     return safe_user
 
 
